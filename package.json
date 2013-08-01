@@ -1,0 +1,14 @@
+{
+  "name": "galegis-report",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start": "coffee app.coffee"
+  },
+  "dependencies": {
+    "express": "3.3.4",
+    "jade": "*",
+    "stylus": "*",
+    "kue": "0.6.2"
+  }
+}

@@ -22,6 +22,7 @@ is doing. That starts with recording and standardizing the information.
 
 ## Getting Started
 
+I eventually plan for this to be a hosted service anyone can just query, but not yet.
 The project is currently under development, so there's no public endpoint you can access
 quite yet. But feel free to clone the project and set it up yourself. Use the usual
 `npm install -d` to get the packages you need and `coffee app.coffee` to boot it up.

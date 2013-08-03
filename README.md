@@ -12,7 +12,7 @@ is important and knowing the incumbants you may want to vote for is important.
 
 ## General Structure
 
-The app will use express for its frontend, apricot to scrape data from the General
+The app uses express for its frontend, apricot to scrape data from the General
 Assembly website, kue (backed by redis) to queue up and process those jobs, and
 mongodb as the persistent datastore for information recorded.
 
@@ -20,7 +20,12 @@ I don't see this project as an end unto itself, but as a stepping stone to
 providing open, structured access to information on what the Georgia State Government
 is doing. That starts with recording and standardizing the information.
 
-## API Specification
+## Getting Started
+
+The project is currently under development, so there's no public endpoint you can access
+quite yet. But feel free to clone the project and set it up yourself. Use the usual
+`npm install -d` to get the packages you need and `coffee app.coffee` to boot it up.
+The web scraper will populate your local MongoDB automatically.
 
 ## Who am I?
 

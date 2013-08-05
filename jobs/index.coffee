@@ -14,3 +14,19 @@
 module.exports = (jobs) ->
   require('./scrape-sessions')(jobs)
   require('./scrape-vote-list')(jobs)
+
+  jobs.process 'poll', (job, done) ->
+    # Queue up jobs that should run on each poll.
+    jobs.create('scrape sessions').save()
+    jobs.create('scrape people').save()
+    #jobs.create('scrape committees').save()
+    #jobs.create('scrape legislation').save()
+    #jobs.create('scrape votes').save()
+
+    # Schedule the next poll.
+    # todo
+
+    done()
+
+  # Create initial poll
+  jobs.create('poll').save()

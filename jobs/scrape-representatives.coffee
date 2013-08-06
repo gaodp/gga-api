@@ -93,12 +93,12 @@ scrapeRepresentativesForSession = (session, callback) ->
       callback(err)
       return
 
-   doc.find("#ctl00_SPWebPartManager1_g_95d7a129_1d7d_4ebf_bdca_6fc160c6ae6d > div > div > div:last-child a").each (repLink) ->
-     repLinkParts = repLink.attr("href").match(/.*Member=([0-9]+)&Session=([0-9]+)/)
-     assemblyMemberId = repLinkParts[1]
-     scrapeRepresentativeProfile(session, assemblyMemberId, callback)
+    doc.find("#ctl00_SPWebPartManager1_g_95d7a129_1d7d_4ebf_bdca_6fc160c6ae6d > div > div > div:last-child a").each (repLink) ->
+      repLinkParts = repLink.href.match(/.*Member=([0-9]+)&Session=([0-9]+)/)
+      assemblyMemberId = repLinkParts[1]
+      scrapeRepresentativeProfile(session, assemblyMemberId, callback)
 
-modules.exports = (jobs) ->
+module.exports = (jobs) ->
   jobs.process 'scrape representatives', (job, done) ->
     MongoClient.connect mongoUrl, (err, db) ->
       if err
@@ -117,7 +117,7 @@ modules.exports = (jobs) ->
           return
 
         sessions.forEach (session) ->
-          scrapeRepresentativeForSession session, (err) ->
+          scrapeRepresentativesForSession session, (err) ->
             if err
               console.error err
               done err

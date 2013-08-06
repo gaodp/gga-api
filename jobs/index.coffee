@@ -13,6 +13,7 @@
 #   limitations under the License.
 module.exports = (jobs) ->
   require('./scrape-sessions')(jobs)
+  require('./scrape-representatives')(jobs)
   require('./scrape-vote-list')(jobs)
 
   jobs.process 'poll', (job, done) ->

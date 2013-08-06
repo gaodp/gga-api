@@ -56,23 +56,24 @@ persistRepresentative = (session, assemblyMemberId, newRepresentative, callback)
             callback()
 
 scrapeRepresentativeProfile = (session, assemblyMemberId, callback) ->
+  console.log("Visit " + representativeProfileUrl(assemblyMemberId, session.assemblyId))
   Apricot.open representativeProfileUrl(assemblyMemberId, session.assemblyId), (err, doc) ->
     if err
       callback(err)
       return
 
-    displayName = doc.find(".HouseH1").innerHTML.trim()
+    displayName = doc.find(".HouseH1").matches[0].innerHTML.trim()
     nameParts = displayName.split(" ")
     firstName = nameParts.shift()
     lastName = nameParts.join(" ")
 
-    partyAndCity = doc.find(".normal").innerHTML.split(" ")
+    partyAndCity = doc.find(".normal").matches[0].innerHTML.split(" ")
     party = partyAndCity[0]
     city = partyAndCity[2]
 
-    district = Number(doc.find(".normal:last-child").innerHTML.replace("District ", ""))
+    district = Number(doc.find(".normal:last-child").matches[0].innerHTML.replace("District ", ""))
 
-    photoUri = "http://www.house.ga.gov" + doc.find("img[alt=Picture Not Found]").attr("src")
+    photoUri = "http://www.house.ga.gov" + doc.find("img[alt=Picture Not Found]").matches[0].src.replace("file://", "")
 
     newRepresentative =
       generalAssemblyId: assemblyMemberId,

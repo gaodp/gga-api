@@ -18,7 +18,7 @@ module.exports = (jobs) ->
   jobs.process 'poll', (job, done) ->
     # Queue up jobs that should run on each poll.
     jobs.create('scrape sessions').save()
-    jobs.create('scrape people').save()
+    jobs.create('scrape representatives').save()
     #jobs.create('scrape committees').save()
     #jobs.create('scrape legislation').save()
     #jobs.create('scrape votes').save()

@@ -111,6 +111,8 @@ scrapeRepresentativesForSession = (session, callback) ->
 
 module.exports = (jobs) ->
   jobs.process 'scrape representatives', (job, done) ->
+    console.log("Scrape members of GA House of Representatives...")
+
     MongoClient.connect mongoUrl, (err, db) ->
       if err
         console.error(err)
@@ -134,6 +136,7 @@ module.exports = (jobs) ->
               done err
               return
             else
+              console.log("House of Representative Scrape Complete.")
               done()
               return
               

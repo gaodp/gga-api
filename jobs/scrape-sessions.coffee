@@ -87,7 +87,10 @@ module.exports = (jobs) ->
               done(err)
               return
 
-            if count == 0
+            unless count == 0
+              db.close()
+              done()
+            else
               console.log("Creating session " + sessionName + " " + sessionId)
               persistNewSession db, sessionId, sessionName, (err) ->
                 if err

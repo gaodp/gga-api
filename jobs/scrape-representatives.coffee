@@ -24,20 +24,30 @@ representativeProfileUrl = (memberId, sessionId) ->
 
 persistRepresentative = (session, assemblyMemberId, newRepresentative, callback) ->
   MongoClient.connect mongoUrl, (err, db) ->
+    if err
+      console.error("Couldn't connect to mongo: " + err)
+      callback err
+      return
+
     db.collection(peopleCollectionName).findOne
       generalAssemblyId: assemblyMemberId
     , (err, representative) ->
       if err
         callback err
+        db.close()
         return
 
       # Representative exists...
       if representative
+        newRepresentative.sessions = representative.sessions
+
+        unless newRepresentative.sessions.indexOf(session._id) > -1
+          newRepresentative.sessions.push(session._id)
+
         db.collection(peopleCollectionName).update
           generalAssemblyId: assemblyMemberId
         ,
-          "$addToSet":
-            activeSessions: session._id
+          newRepresentative
         ,
           safe: true
         , (err) ->
@@ -55,8 +65,9 @@ persistRepresentative = (session, assemblyMemberId, newRepresentative, callback)
           else
             callback()
 
+      db.close()
+
 scrapeRepresentativeProfile = (session, assemblyMemberId, callback) ->
-  console.log("Visit " + representativeProfileUrl(assemblyMemberId, session.assemblyId))
   Apricot.open representativeProfileUrl(assemblyMemberId, session.assemblyId), (err, doc) ->
     if err
       callback(err)

@@ -36,7 +36,7 @@ persistRepresentative = (session, assemblyMemberId, newRepresentative, callback)
         db.collection(peopleCollectionName).update
           generalAssemblyId: assemblyMemberId
         ,
-          "$push":
+          "$addToSet":
             activeSessions: session._id
         ,
           safe: true

@@ -16,6 +16,7 @@ module.exports = (jobs) ->
   require('./import-members')(jobs)
   require("./import-committees")(jobs)
   require("./import-legislation")(jobs)
+  require("./import-votes")(jobs)
 
   jobs.process 'poll', (job, done) ->
     # Queue up jobs that should run on each poll.
@@ -23,7 +24,7 @@ module.exports = (jobs) ->
     jobs.create('import members').save()
     jobs.create('import committees').save()
     jobs.create('import legislation').save()
-    #jobs.create('scrape votes').save()
+    jobs.create('import votes').save()
 
     # Schedule the next poll.
     # todo

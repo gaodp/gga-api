@@ -11,6 +11,9 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
+helpers = require '../util/helpers'
+ifSuccessful = helpers.ifSuccessful
+
 soap = require 'soap'
 MongoClient = require('mongodb').MongoClient
 mongoUrl = "mongodb://127.0.0.1:27017/galegis-api-dev"
@@ -23,11 +26,7 @@ persistSession = (session, callback) ->
     current: (session.IsDefault.toLowerCase() == "true"),
     library: session.Library
 
-  MongoClient.connect mongoUrl, (err, db) ->
-    if err
-      callback(err)
-      return
-
+  MongoClient.connect mongoUrl, (err, db) -> ifSuccessful err, callback, ->
     db.collection("sessions").update
       assemblyId: Number(session.Id)
     ,
@@ -38,27 +37,13 @@ persistSession = (session, callback) ->
     , (err, doc) ->
       db.close()
 
-      if err
-        console.err err
-        callback(err)
-        return
-
-      callback()
+      ifSuccessful err, callback, ->
+        callback()
 
 module.exports = (jobs) ->
-  jobs.process 'import sessions', (job, done) ->
-    soap.createClient sessionSvcUri, (err, client) ->
-      if err
-        console.error(err)
-        done(err)
-        return
-
+  jobs.process 'import sessions', (job, callback) ->
+    soap.createClient sessionSvcUri, (err, client) -> ifSuccessful err, callback, ->
       client.SessionService.BasicHttpBinding_SessionFinder.GetSessions (err, result, raw) ->
-        if err
-          console.error(err)
-          done(err)
-          return
-
-        sessions = result.GetSessionsResult.Session
-
-        persistSession(session, done) for session in sessions
+        ifSuccessful err, callback, ->
+          sessions = result.GetSessionsResult.Session
+          persistSession(session, callback) for session in sessions

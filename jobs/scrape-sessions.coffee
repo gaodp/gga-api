@@ -11,12 +11,12 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
-Apricot = require('apricot').Apricot
+soap = require 'soap'
 MongoClient = require('mongodb').MongoClient
 mongoUrl = "mongodb://127.0.0.1:27017/galegis-api-dev"
 
 sessionCollectionName = "sessions"
-sessionScrapeUri = "http://www.legis.ga.gov/Legislation/en-US/VoteList.aspx"
+sessionSvcUri = "./wsdl/Service.svc.xml"
 
 persistNewSession = (db, assemblyId, name, callback) ->
   db.collection(sessionCollectionName).insert
@@ -65,13 +65,16 @@ markActiveSession = (db, callback) ->
 
 module.exports = (jobs) ->
   jobs.process 'scrape sessions', (job, done) ->
-    Apricot.open sessionScrapeUri, (err, doc) ->
+    soap.createClient sessionSvcUri, (err, client) ->
       if err
         console.error(err)
         done(err)
         return
 
-      doc.find("select[name=ctl00$SPWebPartManager1$g_f97fdca8_f858_400b_9279_a6a8f76ec618$Session] > *").each (elem) ->
+      console.log client.describe()
+
+      ###
+      client.GetSessions {}, (err, result) ->
         sessionId = Number(elem.value)
         sessionName = elem.innerHTML.trim()
 
@@ -113,3 +116,4 @@ module.exports = (jobs) ->
 
                     done()
                     db.close()
+                    ###

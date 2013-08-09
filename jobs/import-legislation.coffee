@@ -11,24 +11,17 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
+helpers = require '../util/helpers'
+ifSuccessful = helpers.ifSuccessful
+
+soap = require 'soap'
+MongoClient = require('mongodb').MongoClient
+mongoUrl = "mongodb://127.0.0.1:27017/galegis-api-dev"
+
+legislationSvcUri = "./wsdl/Legislation.svc.xml"
+
 module.exports = (jobs) ->
-  require('./import-sessions')(jobs)
-  require('./import-members')(jobs)
-  require("./import-committees")(jobs)
-  require("./import-legislation")(jobs)
-
-  jobs.process 'poll', (job, done) ->
-    # Queue up jobs that should run on each poll.
-    jobs.create('import sessions').save()
-    jobs.create('import members').save()
-    jobs.create('import committees').save()
-    jobs.create('import legislation').save()
-    #jobs.create('scrape votes').save()
-
-    # Schedule the next poll.
-    # todo
-
-    done()
-
-  # Create initial poll
-  jobs.create('poll').save()
+  jobs.process 'import legislation', (job, callback) ->
+    soap.createClient legislationSvcUri, (err, client) -> ifSuccessful err, callback, ->
+      console.log client.describe()
+      callback()

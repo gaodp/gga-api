@@ -46,7 +46,7 @@ persistSession = (session, callback) ->
       callback()
 
 module.exports = (jobs) ->
-  jobs.process 'scrape sessions', (job, done) ->
+  jobs.process 'import sessions', (job, done) ->
     soap.createClient sessionSvcUri, (err, client) ->
       if err
         console.error(err)

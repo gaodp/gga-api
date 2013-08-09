@@ -12,11 +12,11 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 module.exports = (jobs) ->
-  require('./scrape-sessions')(jobs)
+  require('./import-sessions')(jobs)
 
   jobs.process 'poll', (job, done) ->
     # Queue up jobs that should run on each poll.
-    jobs.create('scrape sessions').save()
+    jobs.create('import sessions').save()
     #jobs.create('scrape representatives').save()
     #jobs.create('scrape committees').save()
     #jobs.create('scrape legislation').save()

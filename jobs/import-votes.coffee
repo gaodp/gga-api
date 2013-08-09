@@ -13,6 +13,17 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-exports.index = (req, res) ->
-  res.render 'index',
-    title: 'Express'
+helpers = require '../util/helpers'
+ifSuccessful = helpers.ifSuccessful
+
+soap = require 'soap'
+MongoClient = require('mongodb').MongoClient
+mongoUrl = "mongodb://127.0.0.1:27017/galegis-api-dev"
+
+votesSvcUri = "./wsdl/Votes.svc.xml"
+
+module.exports = (jobs) ->
+  jobs.process 'import votes', (job, callback) ->
+    soap.createClient votesSvcUri, (err, client) -> ifSuccessful err, callback, ->
+      console.log client.describe()
+      callback()

@@ -13,6 +13,10 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-exports.index = (req, res) ->
-  res.render 'index',
-    title: 'Express'
+module.exports =
+  ifSuccessful: (err, errHandler, successHandler) ->
+    if err
+      errHandler(err)
+    else
+      successHandler()
+

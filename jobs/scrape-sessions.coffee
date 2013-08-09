@@ -15,52 +15,34 @@ soap = require 'soap'
 MongoClient = require('mongodb').MongoClient
 mongoUrl = "mongodb://127.0.0.1:27017/galegis-api-dev"
 
-sessionCollectionName = "sessions"
 sessionSvcUri = "./wsdl/Service.svc.xml"
 
-persistNewSession = (db, assemblyId, name, callback) ->
-  db.collection(sessionCollectionName).insert
-    assemblyId: assemblyId,
-    name: name,
-    current: false
-  ,
-    safe: true
-  , (err, doc) ->
+persistSession = (session, callback) ->
+  sessionInstance =
+    name: session.Description,
+    current: (session.IsDefault.toLowerCase() == "true"),
+    library: session.Library
+
+  MongoClient.connect mongoUrl, (err, db) ->
     if err
-      console.err err
       callback(err)
       return
 
-    console.log "Created session " + doc[0].name + " under ID " + doc[0]._id
-    callback()
+    db.collection("sessions").update
+      assemblyId: Number(session.Id)
+    ,
+      "$set": sessionInstance
+    ,
+      safe: true,
+      upsert: true
+    , (err, doc) ->
+      db.close()
 
-clearActiveSessions = (db, callback) ->
-  db.collection("sessions").update
-    current: true
-  ,
-    "$set":
-      "current": false
-  ,
-    safe: true
-  , callback
+      if err
+        console.err err
+        callback(err)
+        return
 
-markActiveSession = (db, callback) ->
-  db.collection("sessions").find({}, "sort": [['assemblyId','desc']]).toArray (err, docs) ->
-    if err
-      console.error(err)
-      callback(err)
-      return
-
-    if docs[0]
-      db.collection("sessions").update
-        "_id": docs[0]._id
-      ,
-        "$set":
-          "current": true
-      ,
-        "safe": true
-      , callback
-    else
       callback()
 
 module.exports = (jobs) ->
@@ -71,49 +53,12 @@ module.exports = (jobs) ->
         done(err)
         return
 
-      console.log client.describe()
+      client.SessionService.BasicHttpBinding_SessionFinder.GetSessions (err, result, raw) ->
+        if err
+          console.error(err)
+          done(err)
+          return
 
-      ###
-      client.GetSessions {}, (err, result) ->
-        sessionId = Number(elem.value)
-        sessionName = elem.innerHTML.trim()
+        sessions = result.GetSessionsResult.Session
 
-        MongoClient.connect mongoUrl, (err, db) ->
-          if err
-            console.log(err)
-            done(err)
-            return
-
-          db.collection("sessions").count {assemblyId: sessionId}, (err, count) ->
-            if err
-              console.log(err)
-              done(err)
-              return
-
-            unless count == 0
-              db.close()
-              done()
-            else
-              console.log("Creating session " + sessionName + " " + sessionId)
-              persistNewSession db, sessionId, sessionName, (err) ->
-                if err
-                  console.log(err)
-                  done(err)
-                  db.close()
-                  return
-
-                clearActiveSessions db, (err) ->
-                  if err
-                    done(err)
-                    db.close()
-                    return
-
-                  markActiveSession db, (err) ->
-                    if err
-                      done(err)
-                      db.close()
-                      return
-
-                    done()
-                    db.close()
-                    ###
+        persistSession(session, done) for session in sessions

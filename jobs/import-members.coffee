@@ -22,7 +22,7 @@ mongoUrl = "mongodb://127.0.0.1:27017/galegis-api-dev"
 
 membersSvcUri = "./wsdl/Members.svc.xml"
 
-persistMember = (session, type, member, callback) ->
+persistMember = (session, member, callback) ->
   # TODO
 
 module.exports = (jobs) ->
@@ -33,13 +33,11 @@ module.exports = (jobs) ->
           db.close()
 
           results.forEach (session) ->
-            ["Senator", "Representative"].forEach (type) ->
-              getMembersArgs =
-                SessionId: session.assemblyId
-                MemberType: type
+            getMembersArgs =
+              SessionId: session.assemblyId
 
-              client.MemberService.BasicHttpBinding_MemberFinder.GetMembersBySession getMembersArgs, (err, result, raw) -> ifSuccessful err, callback, ->
-                result.GetMembersBySessionResult.MemberListing.forEach (member) ->
-                  persistMember session, type, member, callback
+            client.MemberService.BasicHttpBinding_MemberFinder.GetMembersBySession getMembersArgs, (err, result, raw) -> ifSuccessful err, callback, ->
+              result.GetMembersBySessionResult.MemberListing.forEach (member) ->
+                persistMember session, member, callback
 
-                callback()
+              callback()

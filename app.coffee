@@ -18,6 +18,9 @@ routes = require('./routes')
 http = require('http')
 path = require('path')
 kue = require('kue')
+MongoClient = require('mongodb').MongoClient
+
+mongoUrl = "mongodb://127.0.0.1:27017/galegis-api-dev"
 
 jobs = kue.createQueue()
 app = express()
@@ -43,8 +46,16 @@ if 'development' == app.get('env')
 
 app.get('/', routes.index)
 
-http.createServer(app).listen app.get('port'), () ->
-  console.log('Express server listening on port ' + app.get('port'))
+mongoOptions =
+  db:
+    w: 1
+  server:
+    poolSize: 10
+    auto_reconnect: true
 
-# Boot up job processing system.
-require('./jobs')(jobs)
+MongoClient.connect mongoUrl, mongoOptions, (err, db) ->
+  http.createServer(app).listen app.get('port'), () ->
+    console.log('Express server listening on port ' + app.get('port'))
+
+  # Boot up job processing system.
+  require('./jobs')(jobs, db)

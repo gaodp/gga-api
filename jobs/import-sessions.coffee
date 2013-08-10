@@ -22,30 +22,26 @@ mongoUrl = "mongodb://127.0.0.1:27017/galegis-api-dev"
 
 sessionSvcUri = "./wsdl/Sessions.svc.xml"
 
-persistSession = (session, callback) ->
+persistSession = (session, db, callback) ->
   sessionInstance =
     name: session.Description,
     current: (session.IsDefault.toLowerCase() == "true"),
     library: session.Library
 
-  MongoClient.connect mongoUrl, (err, db) -> ifSuccessful err, callback, ->
-    db.collection("sessions").update
-      assemblyId: Number(session.Id)
-    ,
-      "$set": sessionInstance
-    ,
-      safe: true,
-      upsert: true
-    , (err, doc) ->
-      db.close()
+  #MongoClient.connect mongoUrl, (err, db) -> ifSuccessful err, callback, ->
+  db.collection("sessions").update
+    assemblyId: Number(session.Id)
+  ,
+    "$set": sessionInstance
+  ,
+    upsert: true
+  , (err, doc) -> ifSuccessful err, callback, ->
+    callback()
 
-      ifSuccessful err, callback, ->
-        callback()
-
-module.exports = (jobs) ->
+module.exports = (jobs, db) ->
   jobs.process 'import sessions', (job, callback) ->
     soap.createClient sessionSvcUri, (err, client) -> ifSuccessful err, callback, ->
       client.SessionService.BasicHttpBinding_SessionFinder.GetSessions (err, result, raw) ->
         ifSuccessful err, callback, ->
           sessions = result.GetSessionsResult.Session
-          persistSession(session, callback) for session in sessions
+          persistSession(session, db, callback) for session in sessions

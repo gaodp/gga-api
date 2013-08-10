@@ -13,12 +13,12 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-module.exports = (jobs) ->
-  require('./import-sessions')(jobs)
-  require('./import-members')(jobs)
-  require("./import-committees")(jobs)
-  require("./import-legislation")(jobs)
-  require("./import-votes")(jobs)
+module.exports = (jobs, db) ->
+  require('./import-sessions')(jobs, db)
+  require('./import-members')(jobs, db)
+  require("./import-committees")(jobs, db)
+  require("./import-legislation")(jobs, db)
+  require("./import-votes")(jobs, db)
 
   jobs.process 'poll', (job, done) ->
     # Queue up jobs that should run on each poll.

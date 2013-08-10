@@ -14,11 +14,15 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 module.exports = (app, db) ->
-  # API v1
-  require('./api/v1/sessions')(app, db)
-  require('./api/v1/members')(app, db)
+  # GET /api/v1/members - Retrieve all members for a particular session.
+  # (Defaults to current session.)
+  app.get '/api/v1/members', (req, res) ->
+    res.send(501)
 
-  # Stock express homepage.
-  app.get '/', (req, res) ->
-    res.render 'index',
-      title: 'Express'
+  # GET /api/v1/member/:id - Retrieve all information on a particular member.
+  app.get '/api/v1/member/:id', (req, res) ->
+    res.send(501)
+
+  # GET /api/v1/member/:id/votes - Retrieve all votes for a member.
+  app.get '/api/v1/member/:id/votes', (req, res) ->
+    res.send(501)

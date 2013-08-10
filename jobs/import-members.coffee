@@ -22,8 +22,24 @@ mongoUrl = "mongodb://127.0.0.1:27017/galegis-api-dev"
 
 membersSvcUri = "./wsdl/Members.svc.xml"
 
+persistMember = (session, type, member, callback) ->
+  # TODO
+
 module.exports = (jobs) ->
   jobs.process 'import members', (job, callback) ->
     soap.createClient membersSvcUri, (err, client) -> ifSuccessful err, callback, ->
-      console.log client.describe()
-      callback()
+      MongoClient.connect mongoUrl, (err, db) -> ifSuccessful err, callback, ->
+        db.collection("sessions").find().toArray (err, results) -> ifSuccessful err, callback, ->
+          db.close()
+
+          results.forEach (session) ->
+            ["Senator", "Representative"].forEach (type) ->
+              getMembersArgs =
+                SessionId: session.assemblyId
+                MemberType: type
+
+              client.MemberService.BasicHttpBinding_MemberFinder.GetMembersBySession getMembersArgs, (err, result, raw) -> ifSuccessful err, callback, ->
+                result.GetMembersBySessionResult.MemberListing.forEach (member) ->
+                  persistMember session, type, member, callback
+
+                callback()

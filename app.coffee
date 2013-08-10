@@ -14,7 +14,6 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 express = require('express')
-routes = require('./routes')
 http = require('http')
 path = require('path')
 kue = require('kue')
@@ -44,8 +43,6 @@ app.use(express.static(path.join(__dirname, 'public')))
 if 'development' == app.get('env')
   app.use(express.errorHandler())
 
-app.get('/', routes.index)
-
 mongoOptions =
   db:
     w: 1
@@ -54,6 +51,10 @@ mongoOptions =
     auto_reconnect: true
 
 MongoClient.connect mongoUrl, mongoOptions, (err, db) ->
+  # Load up routes
+  require('./routes')(app, db)
+
+  # Boot HTTP server
   http.createServer(app).listen app.get('port'), () ->
     console.log('Express server listening on port ' + app.get('port'))
 

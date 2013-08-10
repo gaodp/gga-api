@@ -14,10 +14,18 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 module.exports = (app, db) ->
-  # API v1
-  require('./api/v1/sessions')(app, db)
+  # GET /api/v1/sessions - Retrieve all sessions.
+  app.get '/api/v1/sessions', (req, res) ->
+    db.collection("sessions").find().toArray (err, results) ->
+      if err
+        errorId = Math.random().toString(36).substring(7)
+        console.error("Error " + errorId + ": " + err)
 
-  # Stock express homepage.
-  app.get '/', (req, res) ->
-    res.render 'index',
-      title: 'Express'
+        res.json
+          id: errorId,
+          error: err
+        , 500
+
+        return
+
+      res.json results

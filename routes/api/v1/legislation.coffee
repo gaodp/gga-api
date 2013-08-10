@@ -14,12 +14,15 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 module.exports = (app, db) ->
-  # API v1
-  require('./api/v1/sessions')(app, db)
-  require('./api/v1/members')(app, db)
-  require('./api/v1/legislation')(app, db)
+  # GET /api/v1/legislation - Get all matching legislation for query.
+  app.get '/api/v1/legislation', (req, res) ->
+    res.send(501)
 
-  # Stock express homepage.
-  app.get '/', (req, res) ->
-    res.render 'index',
-      title: 'Express'
+  # GET /api/v1/legislation/:id - Get all info on individual legilsation
+  app.get '/api/v1/legislation/:id', (req, res) ->
+    res.send(501)
+
+  # GET /api/v1/legislation/:type/:number - Retrieve a legilation type
+  # by number
+  app.get '/api/v1/legislation/:type/:number', (req, res) ->
+    res.send(501)

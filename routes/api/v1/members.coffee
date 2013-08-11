@@ -13,11 +13,29 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ObjectId = require('mongodb').ObjectID;
+
 module.exports = (app, db) ->
   # GET /api/v1/members - Retrieve all members for a particular session.
   # (Defaults to current session.)
   app.get '/api/v1/members', (req, res) ->
-    res.send(501)
+    db.collection("sessions").findOne {current: true}, (err, currentSession) ->
+      selectedSessionIdStr = req.query.sessionId || currentSession._id.toString()
+      selectedSessionId = new ObjectId(selectedSessionIdStr)
+
+      db.collection("members").find({sessions: selectedSessionId}).toArray (err, results) ->
+        if err
+          errorId = Math.random().toString(36).substring(7)
+          console.error("Error " + errorId + ": " + err)
+
+          res.json
+            id: errorId,
+            error: err
+          , 500
+
+          return
+
+        res.json(results)
 
   # GET /api/v1/member/:id - Retrieve all information on a particular member.
   app.get '/api/v1/member/:id', (req, res) ->

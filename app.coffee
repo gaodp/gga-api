@@ -19,7 +19,7 @@ path = require('path')
 kue = require('kue')
 MongoClient = require('mongodb').MongoClient
 
-mongoUrl = ""
+mongoUrl = "mongodb://127.0.0.1:27017/galegis-api-dev"
 
 jobs = kue.createQueue()
 app = express()
@@ -39,8 +39,6 @@ app.use(express.static(path.join(__dirname, 'public')))
 
 # development only
 if 'development' == app.get('env')
-  mongoUrl = "mongodb://127.0.0.1:27017/galegis-api-dev"
-
   app.use(express.logger('dev'))
   app.use(express.errorHandler())
   app.use('/kue', kue.app)

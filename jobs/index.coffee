@@ -34,4 +34,4 @@ module.exports = (jobs, db) ->
     done()
 
   # Create initial poll
-  jobs.create('poll').save()
+  #jobs.create('poll').save()

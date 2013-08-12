@@ -20,6 +20,18 @@ module.exports = (app, db) ->
   # (Defaults to current session.)
   app.get '/api/v1/members', (req, res) ->
     db.collection("sessions").findOne {current: true}, (err, currentSession) ->
+      unless currentSession?
+        err = "Could not find current session."
+        errorId = Math.random().toString(36).substring(7)
+        console.error("Error " + errorId + ": " + err)
+
+        res.json
+          id: errorId,
+          error: err
+        , 500
+
+        return
+
       selectedSessionIdStr = req.query.sessionId || currentSession._id.toString()
       selectedSessionId = new ObjectId(selectedSessionIdStr)
 

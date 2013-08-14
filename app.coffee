@@ -62,7 +62,7 @@ mongoOptions =
 
 MongoClient.connect mongoUrl, mongoOptions, (err, db) ->
   # Load up routes
-  require('./routes')(app, db)
+  require('./routes')(app, jobs, db)
 
   # Boot HTTP server
   http.createServer(app).listen app.get('port'), () ->

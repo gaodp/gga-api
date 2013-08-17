@@ -13,9 +13,23 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-module.exports = (jobs, db) ->
-  require('./import-sessions')(jobs, db)
-  require('./import-members')(jobs, db)
-  require("./import-committees")(jobs, db)
-  require("./import-legislation")(jobs, db)
-  require("./import-votes")(jobs, db)
+module.exports = (app, jobs, db) ->
+  app.get '/trigger/sessions', (req, res) ->
+    jobs.create('import sessions').save()
+    res.send 200
+
+  app.get '/trigger/members', (req, res) ->
+    jobs.create('import members').save()
+    res.send 200
+
+  app.get '/trigger/committees', (req, res) ->
+    jobs.create('import committees').save()
+    res.send 200
+
+  app.get '/trigger/legislation', (req, res) ->
+    jobs.create('import legislation').save()
+    res.send 200
+
+  app.get '/trigger/votes', (req, res) ->
+    jobs.create('import votes').save()
+    res.send 200

@@ -13,9 +13,19 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-module.exports = (jobs, db) ->
-  require('./import-sessions')(jobs, db)
-  require('./import-members')(jobs, db)
-  require("./import-committees")(jobs, db)
-  require("./import-legislation")(jobs, db)
-  require("./import-votes")(jobs, db)
+module.exports = (app, db) ->
+  # GET /api/v1/sessions - Retrieve all sessions.
+  app.get '/api/v1/sessions', (req, res) ->
+    db.collection("sessions").find().toArray (err, results) ->
+      if err
+        errorId = Math.random().toString(36).substring(7)
+        console.error("Error " + errorId + ": " + err)
+
+        res.json
+          id: errorId,
+          error: err
+        , 500
+
+        return
+
+      res.json results

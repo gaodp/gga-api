@@ -17,13 +17,35 @@ helpers = require '../util/helpers'
 ifSuccessful = helpers.ifSuccessful
 
 soap = require 'soap'
-MongoClient = require('mongodb').MongoClient
-mongoUrl = "mongodb://127.0.0.1:27017/galegis-api-dev"
-
 legislationSvcUri = "./wsdl/Legislation.svc.xml"
 
-module.exports = (jobs) ->
+persistLegislationIndex = (session, legislationIndex, db, callback) ->
+  assemblyIdForLegislation = legislationIndex.Id
+
+  legislationIndex =
+    sessionId: session._id,
+    title: legislationIndex.Caption,
+    description: legislationIndex.Description
+
+  db.collection("legislation").update
+    assemblyId: assemblyIdForLegislation
+  ,
+    "$set": legislationIndex
+  ,
+    upsert: true,
+    safe: true
+  , (err, doc) ->
+    ifSuccessful err, callback, ->
+      callback()
+
+module.exports = (jobs, db) ->
   jobs.process 'import legislation', (job, callback) ->
     soap.createClient legislationSvcUri, (err, client) -> ifSuccessful err, callback, ->
-      console.log client.describe()
-      callback()
+      db.collection("sessions").find().toArray (err, results) -> ifSuccessful err, callback, ->
+        results.forEach (session) ->
+          getLegislationArgs =
+            SessionId: session.assemblyId
+
+          client.LegislationService.BasicHttpBinding_LegislationSearch.GetLegislationForSession getLegislationArgs, (err, result, raw) -> ifSuccessful err, callback, ->
+            result.GetLegislationForSessionResult.LegislationIndex.forEach (legislationIndex) ->
+              persistLegislationIndex session, legislationIndex, db, callback

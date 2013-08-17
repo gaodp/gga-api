@@ -75,12 +75,13 @@ module.exports = (jobs, db) ->
 
           client.VoteService.BasicHttpBinding_VoteFinder.GetVotes getVotesArgs, (err, result, raw) -> ifSuccessful err, callback, ->
             result.GetVotesResult.VoteListing?.forEach? (assemblyVoteSummary) ->
-              if assemblyVoteSummary.Caption != "ATTENDANCE"
+              if typeof assemblyVoteSummary.Caption != 'string' || assemblyVoteSummary.Caption.toLowerCase() != "attendance"
                 getVoteArgs =
                   VoteId: assemblyVoteSummary.VoteId
 
-                client.VoteService.BasicHttpBinding_VoteFinder.GetVote getVoteArgs, (err, result, raw) -> ifSuccessful err, callback, ->
-                  persistVote(session, result.GetVoteResult, db, callback)
+                client.VoteService.BasicHttpBinding_VoteFinder.GetVote getVoteArgs, (err, result, raw) ->
+                  ifSuccessful err, callback, ->
+                    persistVote(session, result.GetVoteResult, db, callback)
               else
                 persistVote(session, assemblyVoteSummary, db, callback)
 

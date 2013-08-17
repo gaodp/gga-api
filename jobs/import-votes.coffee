@@ -50,6 +50,7 @@ persistVote = (session, vote, db, callback) ->
       sessionId: session._id,
       voteNumber: Number(vote.Number),
       dateTime: vote.Date,
+      caption: vote.Caption,
       description: vote.Description,
       chamber: vote.Branch.toLowerCase(),
       votes: votes

@@ -14,7 +14,9 @@
     "soap": "git://github.com/farmdawgnation/node-soap"
   },
   "devDependencies": {
-      "chai": "*",
-      "mocha": "*"
+    "chai": "*",
+    "mocha": "*",
+    "request": "*",
+    "coffee-script": "*"
   }
 }

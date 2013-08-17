@@ -16,7 +16,6 @@
   "devDependencies": {
     "chai": "*",
     "mocha": "*",
-    "request": "*",
     "coffee-script": "*"
   }
 }

@@ -22,10 +22,18 @@ legislationSvcUri = "./wsdl/Legislation.svc.xml"
 persistLegislationIndex = (session, legislationIndex, db, callback) ->
   assemblyIdForLegislation = legislationIndex.Id
 
+  codeParts = legislationIndex.Description.split(" ")
+  chamber = if codeParts[0][0] == 'H' then 'house' else 'senate'
+  legType = if codeParts[0][1] == 'R' then 'resolution' else 'bill'
+  number = codeParts[1]
+
   legislationIndex =
     sessionId: session._id,
     title: legislationIndex.Caption,
-    description: legislationIndex.Description
+    code: legislationIndex.Description,
+    chamber: chamber,
+    type: legType,
+    number: number
 
   db.collection("legislation").update
     assemblyId: assemblyIdForLegislation

@@ -21,27 +21,26 @@ soap = require 'soap'
 committeesSvcUri = "./wsdl/Committees.svc.xml"
 
 persistCommitteeMembers = (members, committee, session, db, callback) ->
-  if typeof members == 'object'
-    console.log members
-    console.log committee
-    return
+  if ! members.forEach?
+    members = [members]
 
-  members.forEach (member) ->
+  members.forEach? (member) ->
     db.collection("members").findOne {assemblyId: member.Member.Id}, (err, ourMember) -> ifSuccessful err, callback, ->
       unless ourMember?
         console.error("Member " + member.Member.Id + " is missing.")
         return
 
-      memberInfo = {}
-      memberInfo[ourMember._id] = member.Role
+      memberKey = "members." + ourMember._id
+      memberSet = {}
+      memberSet[memberKey] = member.Role
 
       db.collection("committees").update
         sessionId: committee.sessionId,
         assemblyId: committee.assemblyId
       ,
-        "$set":
-          "members": memberInfo
+        "$set": memberSet
       , (err) ->
+        console.error "Something went wrong updating committees: " + err
 
 persistCommittee = (assemblyCommittee, session, db, callback) ->
   members = assemblyCommittee.Members.CommitteeMember

@@ -13,7 +13,37 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ObjectId = require('mongodb').ObjectID;
+
 module.exports = (app, db) ->
   # GET /api/v1/votes - Retrieve all votes.
   app.get '/api/v1/votes', (req, res) ->
-    res.send 501
+    db.collection("sessions").findOne {current: true}, (err, currentSession) ->
+      unless currentSession?
+        err = "Could not find current session."
+        errorId = Math.random().toString(36).substring(7)
+        console.error("Error " + errorId + ": " + err)
+
+        res.json
+          id: errorId,
+          error: err
+        , 500
+
+        return
+
+      selectedSessionIdStr = req.query.sessionId || currentSession._id.toString()
+      selectedSessionId = new ObjectId(selectedSessionIdStr)
+
+      db.collection("votes").find({sessionId: selectedSessionId}).toArray (err, results) ->
+        if err
+          errorId = Math.random().toString(36).substring(7)
+          console.error("Error " + errorId + ": " + err)
+
+          res.json
+            id: errorId,
+            error: err
+          , 500
+
+          return
+
+        res.json(results)

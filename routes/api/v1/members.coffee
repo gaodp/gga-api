@@ -13,7 +13,8 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-ObjectId = require('mongodb').ObjectID;
+ObjectId = require('mongodb').ObjectID
+await = require('await')
 
 module.exports = (app, db) ->
   # GET /api/v1/members - Retrieve all members for a particular session.
@@ -81,4 +82,29 @@ module.exports = (app, db) ->
 
   # GET /api/v1/member/:id/votes - Retrieve all votes for a member.
   app.get '/api/v1/member/:id/votes', (req, res) ->
-    res.send(501)
+    memberObjectId = new ObjectId req.params.id
+
+    votesPromise = await('yeas', 'nays', 'notvoteds', 'excuseds')
+
+    votesPromise.onkeep (got) ->
+      res.json
+        yea: got.yeas,
+        nay: got.nays,
+        notvoted: got.notvoteds,
+        excused: got.excuseds
+
+    db.collection("votes").find({"votes.yea": memberObjectId}).toArray (err, results) ->
+      results = results.map (result) -> result._id
+      votesPromise.keep('yeas', results)
+
+    db.collection("votes").find({"votes.nay": memberObjectId}).toArray (err, results) ->
+      results = results.map (result) -> result._id
+      votesPromise.keep('nays', results)
+
+    db.collection("votes").find({"votes.notvoting": memberObjectId}).toArray (err, results) ->
+      results = results.map (result) -> result._id
+      votesPromise.keep('notvoteds', results)
+
+    db.collection("votes").find({"votes.excused": memberObjectId}).toArray (err, results) ->
+      results = results.map (result) -> result._id
+      votesPromise.keep('excuseds', results)

@@ -45,11 +45,15 @@ persistVote = (session, vote, db, callback) ->
     voteName = memberVote.MemberVoted.toLowerCase()
     votesCast[voteName].push(memberVote.Member.Id)
 
+  # Sometimes the date in the data that comes downwire is a string and other times
+  # it is a proper date. Let's get things into a uniform format in our DB.
+  fixedDate = if typeof vote.Date == 'string' then new Date(vote.Date) else vote.Date
+
   mapVoteMemberIds session, votesCast, db, (votes) ->
     voteDetails =
       sessionId: session._id,
       voteNumber: Number(vote.Number),
-      dateTime: vote.Date,
+      dateTime: fixedDate,
       caption: vote.Caption,
       description: vote.Description,
       chamber: vote.Branch.toLowerCase(),

@@ -1,7 +1,14 @@
 body {
   padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+  margin-right: auto;
+  margin-left: auto;
+  width: 600px;
+  font: 14px "Helvetica Nueue", Arial, sans-serif;
+  color: #333;
 }
 a {
-  color: #00b7ff;
+  color: #333;
+}
+li {
+  padding-bottom: 0.5em;
 }

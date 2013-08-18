@@ -25,4 +25,4 @@ module.exports = (app, jobs, db) ->
   # Stock express homepage.
   app.get '/', (req, res) ->
     res.render 'index',
-      title: 'Express'
+      title: 'GGA REST API'

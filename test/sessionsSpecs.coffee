@@ -6,8 +6,8 @@ MongoClient.MongoClient
 
 describe 'Sessions', ->
 
-  it 'should return 200 when we hit /triggers/session', (done) ->
-    http.get 'http://localhost:3000/trigger/sessions', (res) ->
+  it 'should return 200 when we hit /api/v1/sessions', (done) ->
+    http.get 'http://localhost:3000/api/v1/sessions', (res) ->
       res.statusCode.should.equal 200
       done()
 

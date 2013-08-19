@@ -1,5 +1,48 @@
 extends layout
 
 block content
-  h1= title
-  p Welcome to #{title}
+  <a href="https://github.com/farmdawgnation/galegis-api" target="blank"><img style="position: absolute; top: 0; left: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_left_gray_6d6d6d.png" alt="Fork me on GitHub"></a>
+
+  h1 Georgia Legislative REST API (Alpha)
+  p
+    | Welcome to the Georgia Legislative REST API (galegis-api, for short). In its current form, galegis-api
+    | is in "alpha" state. You should not rely on this service being available at all times or that the
+    | information will accurately reflect the information represented on the GGA website at this time. There
+    | are probably lots of bugs left to sort out, and if you find any we encourage you to 
+    a(href="https://github.com/farmdawgnation/galegis-api/issues", target="_blank") file an issue
+    |  in our bug tracker.
+
+  p
+    | The purpose of this service is to represent information about the activities of the Georgia General Assembly
+    | in a format that's braindead easy to build software against. The current solution offered by the GGA is the use of a
+    | WSDL XML-powered service, which is cumbersome to use and doesn't behave exactly like modern software engineers
+    | expect remote services to behave. So, we've created an alternative that does.
+
+  p
+    | We eventually plan to provide an interface through which humans can easily browse our database, but for now
+    | we're optimizing for other programs, since that was the primary intent from the start. All you need to do to
+    | get started is to send a request to one of our endpoints.
+
+  h2 Active Endpoints
+  
+  p The following endpoints currently have data in them. (More to come soon.)
+  
+  ul
+    li
+      b
+        a(href="/api/v1/sessions") /api/v1/sessions
+      |  - All information in our database is somehow associated to the Legislative Sessions of the General Assembly.
+      | This API call lists off all the sessions we may have data on. Due to incomplete information from the GGA, we
+      | may not have all kinds of data for every session.
+
+    li
+      b
+        a(href="/api/v1/members") /api/v1/members
+      |  - Information on members of the General Assembly can be found here. By default, this API call will list information
+      | on members for the most recent legislative session. If you would like information on members from a different session,
+      | pass the ID of the session as a query parameter named "sessionId" (so... /api/v1/members?sessionId=....)
+
+    li
+      b
+        a(href="/api/v1/member/521000b73de13f5bd9be5911") /api/v1/member/:id
+      |  - Information on a single member. Replace the ID in the example that we link to for information on a different member.

@@ -17,6 +17,8 @@
   "devDependencies": {
     "chai": "*",
     "mocha": "*",
-    "coffee-script": "*"
+    "coffee-script": "*",
+    "soap": "git://github.com/farmdawgnation/node-soap",
+    "await": "0.1.5"
   }
 }

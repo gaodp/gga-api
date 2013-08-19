@@ -1,7 +1,16 @@
 body {
   padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+  margin-right: auto;
+  margin-left: auto;
+  width: 600px;
+  font: 14px "Helvetica Nueue", Arial, sans-serif;
+  line-height: 1.3em;
+  color: #111;
+  background: url("../images/cream_pixels.png");
 }
 a {
-  color: #00b7ff;
+  color: #111;
+}
+li {
+  padding-bottom: 0.5em;
 }

@@ -7,7 +7,7 @@ validatePage = helpers.validatePage
 chai.should()
 MongoClient.MongoClient
 
-describe 'Members', ->
+describe 'Committees', ->
 
-  it 'should return 200 when we hit /api/v1/members', (done) ->
-    validatePage("members", done)
+  it 'should return 200 when we hit /api/v1/committees', (done) ->
+    validatePage("committees", done)

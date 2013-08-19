@@ -1,5 +1,4 @@
 chai = require 'chai'
-MongoClient = require 'mongodb'
 http = require 'http'
 chai.should()
 

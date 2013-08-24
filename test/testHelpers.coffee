@@ -8,8 +8,5 @@ module.exports =
       response.statusCode.should.equal 200
       done()
 
-  houseOrSenate: houseOrSenate = (type) ->
-    type.toLowerCase() == "house" or type.toLowerCase() == "senate"
-
-  billOrResolution: billOrResolution = (type) ->
-    type.toLowerCase() == "bill" or type.toLowerCase() == "resolution"
+  optionMatch: optionMatch = (type, options) ->
+    options.some (match) -> ~type.indexOf match

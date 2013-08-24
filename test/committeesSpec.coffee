@@ -3,7 +3,7 @@ chai = require 'chai'
 request = require 'request'
 
 validatePage = helpers.validatePage
-houseOrSenate = helpers.houseOrSenate
+optionMatch = helpers.optionMatch
 
 chai.should()
 
@@ -20,7 +20,7 @@ describe 'Committees', ->
       for entry in results
         entry._id.should.be.a('string')
         entry.sessionId.should.be.a('string')
-        houseOrSenate(entry.type).should.be.ok
+        optionMatch(entry.type, ['house', 'senate']).should.be.ok
         entry.name.should.be.a('string')
         entry.assemblyCode.should.be.a('string')
         entry.description.should.exist

@@ -3,8 +3,7 @@ chai = require 'chai'
 request = require 'request'
 
 validatePage = helpers.validatePage
-houseOrSenate = helpers.houseOrSenate
-billOrResolution = helpers.billOrResolution
+optionMatch = helpers.optionMatch
 chai.should()
 
 describe 'Legislation', ->
@@ -20,11 +19,11 @@ describe 'Legislation', ->
       for entry in results
         entry._id.should.be.a('string')
         (+entry.assemblyId).should.be.a('number')
-        houseOrSenate(entry.chamber).should.be.ok
+        optionMatch(entry.chamber, ['house', 'senate']).should.be.ok
         entry.code.should.be.a('string')
         (+entry.number).should.be.a('number')
         entry.sessionId.should.be.a('string')
         entry.title.should.be.a('string')
-        billOrResolution(entry.type).should.be.ok
+        optionMatch(entry.type, ['bill', 'resolution']).should.be.ok
 
       done()

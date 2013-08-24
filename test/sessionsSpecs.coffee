@@ -3,7 +3,6 @@ chai = require 'chai'
 request = require 'request'
 
 validatePage = helpers.validatePage
-pageBody = helpers.pageBody
 chai.should()
 
 describe 'Sessions', ->

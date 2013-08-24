@@ -16,10 +16,8 @@
 helpers = require '../util/helpers'
 ifSuccessful = helpers.ifSuccessful
 
+await = require 'await'
 soap = require 'soap'
-MongoClient = require('mongodb').MongoClient
-mongoUrl = "mongodb://127.0.0.1:27017/galegis-api-dev"
-
 membersSvcUri = "./wsdl/Members.svc.xml"
 
 # Data returned by node-soap that was nil in the output is represented
@@ -69,7 +67,7 @@ photoUriForMember = (assemblyId, member) ->
 
   baseUri + member.lastName + member.firstName + assemblyId + ".jpg"
 
-persistMember = (session, member, db, callback) ->
+persistMember = (session, member, db, promise) ->
   assemblyIdForMember = member.Id
 
   memberDetails =
@@ -96,8 +94,10 @@ persistMember = (session, member, db, callback) ->
     upsert: true,
     safe: true
   , (err, doc) ->
-    ifSuccessful err, callback, ->
-      callback()
+    if err?
+      promise.fail(err)
+    else
+      promise.keep('member', doc)
 
 module.exports = (jobs, db) ->
   jobs.process 'import members', (job, callback) ->
@@ -108,7 +108,10 @@ module.exports = (jobs, db) ->
             SessionId: session.assemblyId
 
           client.MemberService.BasicHttpBinding_MemberFinder.GetMembersBySession getMembersArgs, (err, result, raw) -> ifSuccessful err, callback, ->
-            result.GetMembersBySessionResult.MemberListing.forEach (member) ->
-              persistMember session, member, db, callback
+            members = result.GetMembersBySessionResult.MemberListing
 
-            callback()
+            promises = members.map (member) ->
+              await('member').run (promise) ->
+                persistMember(session, member, db, promise)
+
+            await.all(promises).onkeep((got) -> callback()).onfail(() -> callback([].slice.call(arguments).join('\n')))

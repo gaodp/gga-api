@@ -16,27 +16,27 @@
 helpers = require '../util/helpers'
 ifSuccessful = helpers.ifSuccessful
 
+await = require 'await'
 soap = require 'soap'
-MongoClient = require('mongodb').MongoClient
-mongoUrl = "mongodb://127.0.0.1:27017/galegis-api-dev"
-
 sessionSvcUri = "./wsdl/Sessions.svc.xml"
 
-persistSession = (session, db, callback) ->
+persistSession = (session, db, promise) ->
   sessionInstance =
     name: session.Description,
     current: (session.IsDefault.toLowerCase() == "true"),
     library: session.Library
 
-  #MongoClient.connect mongoUrl, (err, db) -> ifSuccessful err, callback, ->
   db.collection("sessions").update
     assemblyId: Number(session.Id)
   ,
     "$set": sessionInstance
   ,
     upsert: true
-  , (err, doc) -> ifSuccessful err, callback, ->
-    callback()
+  , (err, doc) ->
+    if err?
+      promise.fail(err)
+    else
+      promise.keep('session', doc)
 
 module.exports = (jobs, db) ->
   jobs.process 'import sessions', (job, callback) ->
@@ -44,4 +44,9 @@ module.exports = (jobs, db) ->
       client.SessionService.BasicHttpBinding_SessionFinder.GetSessions (err, result, raw) ->
         ifSuccessful err, callback, ->
           sessions = result.GetSessionsResult.Session
-          persistSession(session, db, callback) for session in sessions
+
+          promises = sessions.map (session) ->
+            await('session').run (promise) ->
+              persistSession(session, db, promise)
+
+          await.all(promises).onkeep((got) -> callback()).onfail(() -> callback([].slice.call(arguments).join('\n')))

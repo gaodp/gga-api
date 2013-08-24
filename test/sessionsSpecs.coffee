@@ -16,9 +16,9 @@ describe 'Sessions', ->
       results = JSON.parse body
 
       for entry in results
-        entry._id.should.exist.and.be.a('string')
-        entry.assemblyId.should.exist.and.be.a('number')
-        entry.current.should.exist.and.be.a('boolean')
-        entry.name.should.exist.and.be.a('string')
+        entry._id.should.be.a('string')
+        entry.assemblyId.should.be.a('number')
+        entry.current.should.be.a('boolean')
+        entry.name.should.be.a('string')
 
       done()

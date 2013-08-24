@@ -1,5 +1,6 @@
 chai = require 'chai'
 http = require 'http'
+request = require 'request'
 chai.should()
 
 module.exports =

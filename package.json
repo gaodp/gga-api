@@ -19,6 +19,7 @@
     "mocha": "*",
     "coffee-script": "*",
     "soap": "git://github.com/farmdawgnation/node-soap",
-    "await": "0.1.5"
+    "await": "0.1.5",
+    "request": "*"
   }
 }

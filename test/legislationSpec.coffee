@@ -19,7 +19,7 @@ describe 'Legislation', ->
 
       for entry in results
         entry._id.should.be.a('string')
-        entry.assemblyId.should.be.a('string')
+        (+entry.assemblyId).should.be.a('number')
         houseOrSenate(entry.chamber).should.be.ok
         entry.code.should.be.a('string')
         (+entry.number).should.be.a('number')

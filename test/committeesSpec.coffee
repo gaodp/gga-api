@@ -27,4 +27,8 @@ describe 'Committees', ->
         entry.description.should.exist
         entry.members.should.exist
 
+        for key, value of entry.members
+          key.should.be.a('string')
+          value.should.be.a('string')
+
       done()

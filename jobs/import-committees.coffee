@@ -25,7 +25,7 @@ persistCommitteeMembers = (members, committee, session, db, callback) ->
     members = [members]
 
   members.forEach? (member) ->
-    db.collection("members").findOne {assemblyId: member.Member.Id}, (err, ourMember) -> ifSuccessful err, callback, ->
+    db.collection("members").findOne {assemblyId: Number(member.Member.Id)}, (err, ourMember) -> ifSuccessful err, callback, ->
       unless ourMember?
         console.error("Member " + member.Member.Id + " is missing.")
         return
@@ -40,7 +40,8 @@ persistCommitteeMembers = (members, committee, session, db, callback) ->
       ,
         "$set": memberSet
       , (err) ->
-        console.error "Something went wrong updating committees: " + err
+        if err
+          console.error "Something went wrong updating committees: " + err
 
 persistCommittee = (assemblyCommittee, session, db, callback) ->
   members = assemblyCommittee.Members.CommitteeMember

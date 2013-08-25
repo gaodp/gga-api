@@ -46,3 +46,46 @@ block content
       b
         a(href="/api/v1/member/521000b73de13f5bd9be5911") /api/v1/member/:id
       |  - Information on a single member. Replace the ID in the example that we link to for information on a different member.
+
+    li
+      b
+        a(href="/api/v1/member/521000b73de13f5bd9be5911/votes") /api/v1/member/:id/votes
+      |  - IDs of votes the member has participated in, grouped by what their vote was.
+
+    li
+      b
+        a(href="/api/v1/committees") /api/v1/committees
+      |  - List all committees for the currently active session. To retrieve committees for a different
+      | session, add a "sessionId" query parameter with the sessionId you'd like to retrieve information
+      | on.
+
+    li
+      b /api/v1/committee/:id
+      |  - List all information on a specific committee.
+
+    li
+      b
+        a(href="/api/v1/legislation") /api/v1/legislation
+      |  - List all legislation for the currently active session. (Or a different one if a "sessionId"
+      | query parameter is provided.)
+
+    li
+      b /api/v1/legislation/:id
+      |  - List all information on a specific piece of legislation.
+
+    li
+      b
+        a(href="/api/v1/legislation/hr/1") /api/v1/legislation/:type/:number
+      |  - Retrieve an item of legislation by its number. So, for H.R. 1 in the current session
+      | you'd access /api/v1/legislation/hr/1. To access H.R. 1 from a different session, you'd
+      | pass the sessionId as a query parameter. Valid types are: hr, hb, sr, sb.
+
+    li
+      b
+        a(href="/api/v1/votes") /api/v1/votes
+      |  - List all votes for the current session. (Or a different session if a sessionId is
+      | provided using a query parameter.)
+
+    li
+      b /api/v1/vote/:id
+      |  - List all information on a specific vote.

@@ -17,9 +17,7 @@ helpers = require '../util/helpers'
 ifSuccessful = helpers.ifSuccessful
 
 soap = require 'soap'
-MongoClient = require('mongodb').MongoClient
-mongoUrl = "mongodb://127.0.0.1:27017/galegis-api-dev"
-
+await = require 'await'
 votesSvcUri = "./wsdl/Votes.svc.xml"
 
 mapVoteMemberIds = (session, votesCast, db, callback) ->
@@ -32,7 +30,7 @@ mapVoteMemberIds = (session, votesCast, db, callback) ->
     callback(votesCast)
 
 persistVote = (session, vote, db, callback) ->
-  assemblyIdForVote = vote.VoteId
+  assemblyIdForVote = Number(vote.VoteId)
 
   votesCast =
     yea: [],
@@ -43,7 +41,7 @@ persistVote = (session, vote, db, callback) ->
 
   vote.Votes?.MemberVote.forEach (memberVote) ->
     voteName = memberVote.MemberVoted.toLowerCase()
-    votesCast[voteName].push(memberVote.Member.Id)
+    votesCast[voteName].push(Number(memberVote.Member.Id))
 
   # Sometimes the date in the data that comes downwire is a string and other times
   # it is a proper date. Let's get things into a uniform format in our DB.
@@ -58,6 +56,7 @@ persistVote = (session, vote, db, callback) ->
       description: vote.Description,
       chamber: vote.Branch.toLowerCase(),
       votes: votes
+
 
     db.collection("votes").update
       assemblyId: assemblyIdForVote

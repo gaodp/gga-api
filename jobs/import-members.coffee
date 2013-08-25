@@ -68,7 +68,7 @@ photoUriForMember = (assemblyId, member) ->
   baseUri + member.lastName + member.firstName + assemblyId + ".jpg"
 
 persistMember = (session, member, db, promise) ->
-  assemblyIdForMember = member.Id
+  assemblyIdForMember = Number(member.Id)
 
   memberDetails =
     type: typeForDistrict(member.District),

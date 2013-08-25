@@ -20,7 +20,7 @@ soap = require 'soap'
 legislationSvcUri = "./wsdl/Legislation.svc.xml"
 
 persistLegislationIndex = (session, legislationIndex, db, callback) ->
-  assemblyIdForLegislation = legislationIndex.Id
+  assemblyIdForLegislation = Number(legislationIndex.Id)
 
   codeParts = legislationIndex.Description.split(" ")
   chamber = if codeParts[0][0] == 'H' then 'house' else 'senate'

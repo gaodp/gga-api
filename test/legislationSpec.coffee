@@ -6,13 +6,12 @@ validatePage = helpers.validatePage
 optionMatch = helpers.optionMatch
 chai.should()
 
-describe 'Legislation', ->
+describe 'Legislation API Resource', ->
   page = "legislation"
 
-  it 'should return 200 when we hit /api/v1/legislation', (done) ->
-    validatePage(page, done)
+  it 'should return correct data types', (done) ->
+    validatePage(page)
 
-  it 'should all contain the correct data types', (done) ->
     request 'http://localhost:3000/api/v1/' + page, (error, response, body) ->
       results = JSON.parse body
 

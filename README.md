@@ -34,7 +34,7 @@ You can get access to this API by either using the hosted API, or by running a c
 of this service on your personal computer or server.
 
 **Hosted API**: There is currently a hosted version of this API living on one of my
-servers at [galegis.frmr.me](http://galegis.frmr.me). You should be able to start
+servers at [gga.apis.gaodp.org](http://gga.apis.gaodp.org/). You should be able to start
 making requests against it as you wish without any trouble.
 
 **Run on your computer**: To get started, you'll need a few things:

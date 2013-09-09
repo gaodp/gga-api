@@ -25,7 +25,7 @@ save you a lot of time dealing with SOAP and WSDL.
 that runs without exposing the API. If your site becomes epicly popular and you need
 some serious speed - including all the data hosted locally, you should be able to
 just spin up a copy of this project on your server hooked up to your database. The one
-trade-off here is that it's licensed under the GPL. If you improve it you have to
+trade-off here is that it's licensed under the AGPL. If you improve it you have to
 share with the rest of us!
 
 ## Getting Access

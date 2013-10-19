@@ -21,5 +21,8 @@
     "soap": "git://github.com/farmdawgnation/node-soap",
     "await": "0.1.5",
     "request": "*"
+  },
+  "engines": {
+      "node": "0.10.x"
   }
 }

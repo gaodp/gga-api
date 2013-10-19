@@ -1,6 +1,6 @@
 #!/bin/bash
 
-nohup coffee app.coffee &
+nohup node_modules/.bin/coffee app.coffee &
 sleep 2
 pid=$!
 npm test

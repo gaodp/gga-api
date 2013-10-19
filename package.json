@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "coffee app.coffee",
-    "test": "./node_modules/.bin/mocha --compilers coffee:coffee-script -u tdd -R spec --timeout 2000"
+    "test": "./node_modules/.bin/mocha -C --compilers coffee:coffee-script -u tdd -R spec --timeout 2000"
   },
   "dependencies": {
     "express": "3.3.4",

@@ -36,32 +36,5 @@ module.exports = (app, jobs, db) ->
 
         res.json(results)
 
-  # GET /api/v1/committee/:id
-  app.get '/api/v1/committee/:id', (req, res) ->
-    try
-      committeeObjectId = new ObjectId req.params.id
-    catch
-      errorOutput =
-        fieldId: "committeeId",
-        error: "invalid",
-        message: "The committee id you requested was not a valid identifier. Identifiers should conform to MongoDB's ObjectID format."
-
-      res.json errorOutput, 417
-      return
-
-    db.collection("committees").findOne {_id: committeeObjectId}, (err, committee) ->
-      if err
-        errorId = Math.random().toString(36).substring(7)
-        console.error("Error " + errorId + ": " + err)
-
-        res.json
-          id: errorId,
-          error: err
-        , 500
-
-        return
-
-      if committee?
-        res.json committee
-      else
-        res.send 404
+  app.get '/api/v1/committee/:committee', (req, res) ->
+    res.json req.committee

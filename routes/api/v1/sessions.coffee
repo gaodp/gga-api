@@ -16,3 +16,6 @@ module.exports = (app, jobs, db) ->
         return
 
       res.json results
+
+  app.get '/api/v1/session/:legislativeSession', (req, res) ->
+    res.json req.legislativeSession

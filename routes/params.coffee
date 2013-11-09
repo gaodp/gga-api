@@ -40,6 +40,7 @@ module.exports = (app, jobs, db) ->
             message: "That #{name} was not found."
           , 404
 
+  app.param 'vote', retrieveOrError("votes", "vote")
   app.param 'member', retrieveOrError("members", "member")
   app.param 'committee', retrieveOrError("committees", "committee")
   app.param 'legislation', retrieveOrError("legislation", "legislation")

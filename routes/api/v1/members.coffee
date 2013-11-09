@@ -38,38 +38,12 @@ module.exports = (app, jobs, db) ->
         res.json(results)
 
   # GET /api/v1/member/:id - Retrieve all information on a particular member.
-  app.get '/api/v1/member/:id', (req, res) ->
-    try
-      memberObjectId = new ObjectId req.params.id
-    catch
-      errorOutput =
-        fieldId: "memberId",
-        error: "invalid",
-        message: "The member id you requested was not a valid identifier. Identifiers should conform to MongoDB's ObjectID format."
-
-      res.json errorOutput, 417
-      return
-
-    db.collection("members").findOne {_id: memberObjectId}, (err, member) ->
-      if err
-        errorId = Math.random().toString(36).substring(7)
-        console.error("Error " + errorId + ": " + err)
-
-        res.json
-          id: errorId,
-          error: err
-        , 500
-
-        return
-
-      if member?
-        res.json member
-      else
-        res.send 404
+  app.get '/api/v1/member/:member', (req, res) ->
+    res.json req.member
 
   # GET /api/v1/member/:id/votes - Retrieve all votes for a member.
-  app.get '/api/v1/member/:id/votes', (req, res) ->
-    memberObjectId = new ObjectId req.params.id
+  app.get '/api/v1/member/:member/votes', (req, res) ->
+    memberObjectId = req.member._id
 
     votesPromise = await('yeas', 'nays', 'notvoteds', 'excuseds')
 

@@ -2,7 +2,7 @@
 # Copyright (C) 2013 Matthew Farmer - Distributed Under the GNU AGPL 3.0. See LICENSE at project root.
 ObjectId = require('mongodb').ObjectID;
 
-module.exports = (app, db) ->
+module.exports = (app, jobs, db) ->
   # GET /api/v1/votes - Retrieve all votes.
   app.get '/api/v1/votes', (req, res) ->
     db.collection("sessions").findOne {current: true}, (err, currentSession) ->

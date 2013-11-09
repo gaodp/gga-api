@@ -3,7 +3,7 @@
 ObjectId = require('mongodb').ObjectID
 await = require('await')
 
-module.exports = (app, db) ->
+module.exports = (app, jobs, db) ->
   # GET /api/v1/members - Retrieve all members for a particular session.
   # (Defaults to current session.)
   app.get '/api/v1/members', (req, res) ->

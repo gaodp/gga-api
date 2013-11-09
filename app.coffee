@@ -5,6 +5,7 @@ http = require('http')
 path = require('path')
 kue = require('kue')
 MongoClient = require('mongodb').MongoClient
+requireFu = require('require-fu')
 
 mongoUrl = "mongodb://127.0.0.1:27017/galegis-api-dev"
 
@@ -49,11 +50,11 @@ mongoOptions =
 
 MongoClient.connect mongoUrl, mongoOptions, (err, db) ->
   # Load up routes
-  require('./routes')(app, jobs, db)
+  requireFu(__dirname + '/routes')(app, jobs, db)
 
   # Boot HTTP server
   http.createServer(app).listen app.get('port'), () ->
     console.log('Express server listening on port ' + app.get('port'))
 
   # Boot up job processing system.
-  require('./jobs')(jobs, db)
+  requireFu(__dirname + '/jobs')(jobs, db)

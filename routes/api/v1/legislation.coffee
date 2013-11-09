@@ -36,34 +36,8 @@ module.exports = (app, jobs, db) ->
         res.json(results)
 
   # GET /api/v1/legislation/:id - Get all info on individual legilsation
-  app.get '/api/v1/legislation/:id', (req, res) ->
-    try
-      legislationObjectId = new ObjectId req.params.id
-    catch
-      errorOutput =
-        fieldId: "legislationId",
-        error: "invalid",
-        message: "The legislation id you requested was not a valid identifier. Identifiers should conform to MongoDB's ObjectID format."
-
-      res.json errorOutput, 417
-      return
-
-    db.collection("legislation").findOne {_id: legislationObjectId}, (err, legislation) ->
-      if err
-        errorId = Math.random().toString(36).substring(7)
-        console.error("Error " + errorId + ": " + err)
-
-        res.json
-          id: errorId,
-          error: err
-        , 500
-
-        return
-
-      if legislation?
-        res.json legislation
-      else
-        res.send 404
+  app.get '/api/v1/legislation/:legislation', (req, res) ->
+    res.json legislation
 
   # GET /api/v1/legislation/:type/:number - Retrieve a legilation type
   # by number

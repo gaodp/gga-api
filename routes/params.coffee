@@ -38,3 +38,22 @@ module.exports = (app, jobs, db) ->
           error: "not_found",
           message: "That committee was not found."
         , 404
+
+  app.param 'legislation', (req, res, next, id) ->
+    legislationObjectId = validObjectId(id)
+
+    if legislationObjectId.error?
+      res.json legislationObjectId, 417
+      return
+
+    db.collection("legislation").findOne {_id: legislationObjectId}, (err, legislation) ->
+      if err
+        retrievalError(err, res)
+      else if legislation?
+        req.legislation = legislation
+        next()
+      else
+        res.json
+          error: "not_found",
+          message: "That committee was not found."
+        , 404

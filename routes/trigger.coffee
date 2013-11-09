@@ -18,5 +18,13 @@ module.exports = (app, jobs, db) ->
     res.send 200
 
   app.get '/trigger/votes', (req, res) ->
-    jobs.create('import votes').save()
+    jobs.create('import all votes').save()
+    res.send 200
+
+  app.get '/trigger/votes/session/:legislativeSession', (req, res) ->
+    jobs.create('import all votes for session', session: req.legislativeSession).save()
+    res.send 200
+
+  app.get '/trigger/votes/vote/:legislativeSession/:assemblyVoteId', (req, res) ->
+    jobs.create('import vote', voteId: req.assemblyVoteId, session: req.legislativeSession).save()
     res.send 200

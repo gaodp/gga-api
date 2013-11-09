@@ -6,6 +6,7 @@ ifSuccessful = helpers.ifSuccessful
 soap = require 'soap'
 await = require 'await'
 votesSvcUri = "./wsdl/Votes.svc.xml"
+ObjectId = require('mongodb').ObjectID;
 
 mapVoteMemberIds = (session, votesCast, db, callback) ->
   db.collection("members").find({sessions: session._id}).toArray (err, results) -> ifSuccessful err, callback, ->
@@ -17,6 +18,7 @@ mapVoteMemberIds = (session, votesCast, db, callback) ->
     callback(votesCast)
 
 persistVote = (session, vote, db, callback) ->
+  session._id = new ObjectId(session._id)
   assemblyIdForVote = Number(vote.VoteId)
 
   votesCast =
@@ -56,23 +58,46 @@ persistVote = (session, vote, db, callback) ->
       ifSuccessful err, callback, ->
         callback()
 
-module.exports = (jobs, db) ->
-  jobs.process 'import votes', (job, callback) ->
-    soap.createClient votesSvcUri, (err, client) -> ifSuccessful err, callback, ->
-      db.collection("sessions").find().toArray (err, results) -> ifSuccessful err, callback, ->
-        results.forEach (session) ->
-          getVotesArgs =
-            SessionId: session.assemblyId
+module.exports = (jobs, db) -> soap.createClient votesSvcUri, (err, client) ->
+  throw err if err
 
-          client.VoteService.BasicHttpBinding_VoteFinder.GetVotes getVotesArgs, (err, result, raw) -> ifSuccessful err, callback, ->
-            result.GetVotesResult.VoteListing?.forEach? (assemblyVoteSummary) ->
-              getVoteArgs =
-                VoteId: assemblyVoteSummary.VoteId
+  jobs.process 'import vote', 20, (job, callback) ->
+    getVoteArgs = VoteId: job.data.voteId
 
-              client.VoteService.BasicHttpBinding_VoteFinder.GetVote getVoteArgs, (err, result, raw) ->
-                if err
-                  persistVote(session, assemblyVoteSummary, db, callback)
-                else
-                  persistVote(session, result.GetVoteResult, db, callback)
+    client.VoteService.BasicHttpBinding_VoteFinder.GetVote getVoteArgs, (err, result, raw) ->
+      if err
+        if job.data.assemblyVoteSummary
+          job.log 'Persisting vote summary, as full vote information is unavailable.'
+          persistVote(job.data.session, job.data.assemblyVoteSummary, db, callback)
+        else
+          callback(err)
+      else
+        job.log 'Persisting full vote information.'
+        persistVote(job.data.session, result.GetVoteResult, db, callback)
 
-            callback()
+  jobs.process 'import all votes for session', 5, (job, callback) ->
+    getVotesArgs = SessionId: job.data.session.assemblyId
+
+    client.VoteService.BasicHttpBinding_VoteFinder.GetVotes getVotesArgs, (err, result, raw) ->
+      if err
+        callback(err)
+      else
+        result.GetVotesResult.VoteListing?.forEach? (assemblyVoteSummary) ->
+          job.log 'Kueing up import vote job for ' + assemblyVoteSummary.VoteId
+
+          voteJob = jobs.create 'import vote',
+            assemblyVoteSummary: assemblyVoteSummary,
+            voteId: assemblyVoteSummary.VoteId,
+            session: job.data.session
+
+          voteJob.save()
+
+        callback()
+
+  jobs.process 'import all votes', (job, callback) ->
+    db.collection("sessions").find().toArray (err, results) -> ifSuccessful err, callback, ->
+      results.forEach (session) ->
+        job.log "Kueing up import votes for session job for " + session._id
+        jobs.create('import all votes for session', session: session).save()
+
+      callback()

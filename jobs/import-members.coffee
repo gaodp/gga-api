@@ -5,6 +5,7 @@ ifSuccessful = helpers.ifSuccessful
 
 await = require 'await'
 soap = require 'soap'
+ObjectId = require('mongodb').ObjectID
 membersSvcUri = "./wsdl/Members.svc.xml"
 
 # Data returned by node-soap that was nil in the output is represented
@@ -54,7 +55,7 @@ photoUriForMember = (assemblyId, member) ->
 
   baseUri + member.lastName + member.firstName + assemblyId + ".jpg"
 
-persistMember = (session, member, db, promise) ->
+persistMember = (session, member, db, callback) ->
   assemblyIdForMember = Number(member.Id)
 
   memberDetails =
@@ -81,24 +82,39 @@ persistMember = (session, member, db, promise) ->
     upsert: true,
     safe: true
   , (err, doc) ->
-    if err?
-      promise.fail(err)
-    else
-      promise.keep('member', doc)
+    callback(err)
 
-module.exports = (jobs, db) ->
+module.exports = (jobs, db) -> soap.createClient membersSvcUri, (err, client) ->
+  throw err if err
+
+  jobs.process 'persist member', 20, (job, callback) ->
+    # Ensure object IDs are in the correct format.
+    job.data.session._id = new ObjectId(job.data.session._id)
+
+    persistMember(job.data.session, job.data.member, db, callback)
+
+  jobs.process 'import member', 20, (job, callback) ->
+    callback("Individual member import not currently supported.")
+
+  jobs.process 'import all members for session', 5, (job, callback) ->
+    getMembersArgs =
+      SessionId: job.data.session.assemblyId
+
+    client.MemberService.BasicHttpBinding_MemberFinder.GetMembersBySession getMembersArgs, (err, result, raw) ->
+      if err
+        callback(err)
+      else
+        members = result.GetMembersBySessionResult.MemberListing
+
+        members.map (member) ->
+          jobs.create('persist member', member: member, session: job.data.session).save()
+
+        callback()
+
   jobs.process 'import members', (job, callback) ->
-    soap.createClient membersSvcUri, (err, client) -> ifSuccessful err, callback, ->
-      db.collection("sessions").find().toArray (err, results) -> ifSuccessful err, callback, ->
-        results.forEach (session) ->
-          getMembersArgs =
-            SessionId: session.assemblyId
+    db.collection("sessions").find().toArray (err, results) -> ifSuccessful err, callback, ->
+      results.forEach (session) ->
+        job.log "Kueing up import members for session job for " + session._id
+        jobs.create('import all members for session', session: session).save()
 
-          client.MemberService.BasicHttpBinding_MemberFinder.GetMembersBySession getMembersArgs, (err, result, raw) -> ifSuccessful err, callback, ->
-            members = result.GetMembersBySessionResult.MemberListing
-
-            promises = members.map (member) ->
-              await('member').run (promise) ->
-                persistMember(session, member, db, promise)
-
-            await.all(promises).onkeep((got) -> callback()).onfail(() -> callback([].slice.call(arguments).join('\n')))
+      callback()

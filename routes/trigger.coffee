@@ -9,6 +9,10 @@ module.exports = (app, jobs, db) ->
     jobs.create('import members').save()
     res.send 200
 
+  app.get '/trigger/members/session/:legislativeSession', (req, res) ->
+    jobs.create('import all members for session', session: req.legislativeSession).save()
+    res.send 200
+
   app.get '/trigger/committees', (req, res) ->
     jobs.create('import committees').save()
     res.send 200

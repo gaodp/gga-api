@@ -19,6 +19,24 @@ module.exports = (jobs, db) ->
     startOfNextHour = moment().startOf('hour').add('hours', 1)
     startOfNextHour.diff(moment(), 'milliseconds')
 
+  pollJobWithCurrentSession = (options) ->
+    {createPollJobFn, createJobFn, callback} = options
+
+    db.collection("sessions").findOne {current: true}, (err, currentSession) ->
+      if err
+        createPollJobFn()
+        callback(err)
+        return
+
+      if ! currentSession?
+        createPollJobFn()
+        callback("No current session found.")
+        return
+
+      createJobFn(currentSession)
+      createPollJobFn()
+      callback()
+
   jobs.process 'poll sessions', (job, callback) ->
     jobs.create('import sessions').save()
     jobs.create('poll sessions').delay(msUntilNextMonth()).save()
@@ -26,65 +44,33 @@ module.exports = (jobs, db) ->
     callback()
 
   jobs.process 'poll members', (job, callback) ->
-    db.collection("sessions").findOne {current: true}, (err, currentSession) ->
-      if err
+    pollJobWithCurrentSession
+      createJobFn: (currentSession) ->
+        jobs.create('import all members for session', session: currentSession).save()
+      createPollJobFn: ->
         jobs.create('poll members').delay(msUntilNextWeek()).save()
-        callback(err)
-        return
-
-      if ! currentSession?
-        jobs.create('poll members').delay(msUntilNextWeek()).save()
-        callback("No current session found.")
-        return
-
-      jobs.create('import all members for session', session: currentSession).save()
-      jobs.create('poll members').delay(msUntilNextWeek()).save()
-      callback()
+      callback: callback
 
   jobs.process 'poll committees', (job, callback) ->
-    db.collection("sessions").findOne {current: true}, (err, currentSession) ->
-      if err
+    pollJobWithCurrentSession
+      createJobFn: (currentSession) ->
+        jobs.create('import committees for session', session: currentSession).save()
+      createPollJobFn: ->
         jobs.create('poll committees').delay(msUntilNextWeek()).save()
-        callback(err)
-        return
-
-      if ! currentSession?
-        jobs.create('poll committees').delay(msUntilNextWeek()).save()
-        callback("No current session found.")
-        return
-
-      jobs.create('import committees for session', session: currentSession).save()
-      jobs.create('poll committees').delay(msUntilNextWeek()).save()
-      callback()
+      callback: callback
 
   jobs.process 'poll legislation', (job, callback) ->
-    db.collection("sessions").findOne {current: true}, (err, currentSession) ->
-      if err
+    pollJobWithCurrentSession
+      createJobFn: (currentSession) ->
+        jobs.create('import legislation for session', session: currentSession).save()
+      createPollJobFn: ->
         jobs.create('poll legislation').delay(msUntilNextDay()).save()
-        callback(err)
-        return
-
-      if ! currentSession?
-        jobs.create('poll legislation').delay(msUntilNextDay()).save()
-        callback("No current session found.")
-        return
-
-      jobs.create('import legislation for session', session: currentSession).save()
-      jobs.create('poll legislation').delay(msUntilNextDay()).save()
-      callback()
+      callback: callback
 
   jobs.process 'poll votes', (job, callback) ->
-    db.collection("sessions").findOne {current: true}, (err, currentSession) ->
-      if err
+    pollJobWithCurrentSession
+      createJobFn: (currentSession) ->
+        jobs.create('import all votes for session', session: currentSession).save()
+      createPollJobFn: ->
         jobs.create('poll votes').delay(msUntilNextDay()).save()
-        callback(err)
-        return
-
-      if ! currentSession?
-        jobs.create('poll votes').delay(msUntilNextDay()).save()
-        callback("No current session found.")
-        return
-
-      jobs.create('import all votes for session', session: currentSession).save()
-      jobs.create('poll votes').delay(msUntilNextDay()).save()
-      callback()
+      callback: callback

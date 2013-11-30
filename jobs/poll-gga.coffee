@@ -11,6 +11,10 @@ module.exports = (jobs, db) ->
     startOfNextWeek = moment().startOf('week').add('weeks', 1)
     startOfNextWeek.diff(moment(), 'milliseconds')
 
+  msUntilNextDay = ->
+    startOfNextDay = moment().startOf('day').add('days', 1)
+    startOfNextDay.diff(moment(), 'milliseconds')
+
   msUntilNextHour = ->
     startOfNextHour = moment().startOf('hour').add('hours', 1)
     startOfNextHour.diff(moment(), 'milliseconds')
@@ -56,31 +60,31 @@ module.exports = (jobs, db) ->
   jobs.process 'poll legislation', (job, callback) ->
     db.collection("sessions").findOne {current: true}, (err, currentSession) ->
       if err
-        jobs.create('poll legislation').delay(msUntilNextHour()).save()
+        jobs.create('poll legislation').delay(msUntilNextDay()).save()
         callback(err)
         return
 
       if ! currentSession?
-        jobs.create('poll legislation').delay(msUntilNextHour()).save()
+        jobs.create('poll legislation').delay(msUntilNextDay()).save()
         callback("No current session found.")
         return
 
       jobs.create('import legislation for session', session: currentSession).save()
-      jobs.create('poll legislation').delay(msUntilNextHour()).save()
+      jobs.create('poll legislation').delay(msUntilNextDay()).save()
       callback()
 
   jobs.process 'poll votes', (job, callback) ->
     db.collection("sessions").findOne {current: true}, (err, currentSession) ->
       if err
-        jobs.create('poll votes').delay(msUntilNextHour()).save()
+        jobs.create('poll votes').delay(msUntilNextDay()).save()
         callback(err)
         return
 
       if ! currentSession?
-        jobs.create('poll votes').delay(msUntilNextHour()).save()
+        jobs.create('poll votes').delay(msUntilNextDay()).save()
         callback("No current session found.")
         return
 
       jobs.create('import all votes for session', session: currentSession).save()
-      jobs.create('poll votes').delay(msUntilNextHour()).save()
+      jobs.create('poll votes').delay(msUntilNextDay()).save()
       callback()

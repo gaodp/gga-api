@@ -4,6 +4,7 @@ helpers = require '../util/helpers'
 ifSuccessful = helpers.ifSuccessful
 
 soap = require 'soap'
+ObjectId = require('mongodb').ObjectID
 legislationSvcUri = "./wsdl/Legislation.svc.xml"
 
 persistLegislationIndex = (session, legislationIndex, db, callback) ->
@@ -33,14 +34,23 @@ persistLegislationIndex = (session, legislationIndex, db, callback) ->
     ifSuccessful err, callback, ->
       callback()
 
-module.exports = (jobs, db) ->
-  jobs.process 'import legislation', (job, callback) ->
-    soap.createClient legislationSvcUri, (err, client) -> ifSuccessful err, callback, ->
-      db.collection("sessions").find().toArray (err, results) -> ifSuccessful err, callback, ->
-        results.forEach (session) ->
-          getLegislationArgs =
-            SessionId: session.assemblyId
+module.exports = (jobs, db) -> soap.createClient legislationSvcUri, (err, client) ->
+  throw err if err
 
-          client.LegislationService.BasicHttpBinding_LegislationSearch.GetLegislationForSession getLegislationArgs, (err, result, raw) -> ifSuccessful err, callback, ->
-            result.GetLegislationForSessionResult.LegislationIndex.forEach (legislationIndex) ->
-              persistLegislationIndex session, legislationIndex, db, callback
+  jobs.process 'import legislation for session', 5, (job, callback) ->
+    # Ensure object IDs are in the correct format.
+    job.data.session._id = new ObjectId(job.data.session._id)
+
+    getLegislationArgs =
+      SessionId: job.data.session.assemblyId
+
+    client.LegislationService.BasicHttpBinding_LegislationSearch.GetLegislationForSession getLegislationArgs, (err, result, raw) -> ifSuccessful err, callback, ->
+      result.GetLegislationForSessionResult.LegislationIndex.forEach (legislationIndex) ->
+        persistLegislationIndex job.data.session, legislationIndex, db, callback
+
+  jobs.process 'import legislation', (job, callback) ->
+    db.collection("sessions").find().toArray (err, results) -> ifSuccessful err, callback, ->
+      results.forEach (session) ->
+        jobs.create('import legislation for session', session: session).save()
+
+      callback()

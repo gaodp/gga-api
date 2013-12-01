@@ -37,7 +37,9 @@ if 'production' == app.get('env')
 
   kueUser = process.env.KUEUSER || "kue"
   kuePass = process.env.KUEPASS || "kue"
-  app.use('/kue', express.basicAuth(kueUser, kuePass), kue.app)
+
+  app.use('/kue', express.basicAuth(kueUser, kuePass))
+  app.use('/kue', kue.app)
 
 mongoOptions =
   db:

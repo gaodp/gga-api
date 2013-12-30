@@ -37,7 +37,7 @@ module.exports = (app, jobs, db) ->
 
   # GET /api/v1/legislation/:id - Get all info on individual legilsation
   app.get '/api/v1/legislation/:legislation', (req, res) ->
-    res.json legislation
+    res.json req.legislation
 
   # GET /api/v1/legislation/:type/:number - Retrieve a legilation type
   # by number

@@ -25,7 +25,7 @@ eliminateUndefineds = (obj) ->
 
   obj
 
-persistLegislationDetail = (legislationId, legislationDetail, db, callback) ->
+persistLegislationDetail = (legislationId, legislationDetail, db, jobs, callback) ->
   parseStatus = (status) ->
     code: status.Code
     date: new Date(status.Date)
@@ -37,7 +37,7 @@ persistLegislationDetail = (legislationId, legislationDetail, db, callback) ->
     version: Number(latestVersion.Version)
     url: latestVersion.Url
 
-  legislationDetail =
+  gaodpLegislationDetail =
     summary: stringOrUndefined(legislationDetail.Summary)
     actVetoNumber: stringOrUndefined(legislationDetail.ActVetoNumber)
     footnotes: stringOrUndefined(legislationDetail.Footnotes)
@@ -47,9 +47,11 @@ persistLegislationDetail = (legislationId, legislationDetail, db, callback) ->
   db.collection("legislation").update
     _id: legislationId
   ,
-    "$set": eliminateUndefineds(legislationDetail)
+    "$set": eliminateUndefineds(gaodpLegislationDetail)
   , (err, doc) ->
     ifSuccessful err, callback, ->
+      jobs.create('persist legislation authors', legislationId: legislationId, legislationDetail: legislationDetail).save()
+      jobs.create('persist legislation committees', legislationId: legislationId, legislationDetail: legislationDetail).save()
       callback()
 
 persistLegislationIndex = (session, legislationIndex, db, callback) ->
@@ -82,6 +84,21 @@ persistLegislationIndex = (session, legislationIndex, db, callback) ->
 module.exports = (jobs, db) -> soap.createClient legislationSvcUri, (err, client) ->
   throw err if err
 
+  jobs.process 'persist legislation authors', 5, (job, callback) ->
+    legislationId = new ObjectId(job.data.legislationId)
+
+    authorAssemblyIds = job.data.legislationDetail.Authors.Sponsorship.map (sponsorship) ->
+      Number(sponsorship.MemberId)
+
+    db.collection("members").find(assemblyId: {"$in": authorAssemblyIds}).toArray (err, results) -> ifSuccessful err, callback, ->
+      authorObjectIds = results.map((_) -> _._id)
+
+      db.collection("legislation").update {_id: legislationId}, {"$set": {"authors": authorObjectIds}}, (err) ->
+        callback(err)
+
+  jobs.process 'persist legislation committees', 5, (job, callback) ->
+    callback()
+
   jobs.process 'import legislation detail', 5, (job, callback) ->
     # Ensure legislation object ID is in the proper format
     job.data.legislation._id = new ObjectId(job.data.legislation._id)
@@ -90,7 +107,7 @@ module.exports = (jobs, db) -> soap.createClient legislationSvcUri, (err, client
       LegislationId: job.data.legislation.assemblyId
 
     client.LegislationService.BasicHttpBinding_LegislationSearch.GetLegislationDetail getLegislationDetailArgs, (err, result, raw) -> ifSuccessful err, callback, ->
-      persistLegislationDetail(job.data.legislation._id, result.GetLegislationDetailResult, db, callback)
+      persistLegislationDetail(job.data.legislation._id, result.GetLegislationDetailResult, db, jobs, callback)
 
   jobs.process 'import legislation detail for session', 5, (job, callback) ->
     # Ensure object IDs are in the correct format.

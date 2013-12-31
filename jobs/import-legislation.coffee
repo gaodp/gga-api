@@ -97,7 +97,22 @@ module.exports = (jobs, db) -> soap.createClient legislationSvcUri, (err, client
         callback(err)
 
   jobs.process 'persist legislation committees', 5, (job, callback) ->
-    callback()
+    legislationId = new ObjectId(job.data.legislationId)
+
+    committeesArray = if job.data.legislationDetail.Committees.CommitteeListing.map?
+      job.data.legislationDetail.Committees.CommitteeListing
+    else
+      [job.data.legislationDetail.Committees.CommitteeListing]
+
+    committeeAssemblyIds = committeesArray.map (committee) ->
+      console.log(committee)
+      Number(committee.Id)
+
+    db.collection("committees").find(assemblyId: {"$in": committeeAssemblyIds}).toArray (err, results) -> ifSuccessful err, callback, ->
+      committeeObjectIds = results.map((_) -> _._id)
+
+      db.collection("legislation").update {_id: legislationId}, {"$set": {"committees": committeeObjectIds}}, (err) ->
+        callback(err)
 
   jobs.process 'import legislation detail', 5, (job, callback) ->
     # Ensure legislation object ID is in the proper format

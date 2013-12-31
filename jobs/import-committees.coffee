@@ -37,7 +37,7 @@ persistCommittee = (assemblyCommittee, session, db, callback) ->
     sessionId: session._id,
     type: assemblyCommittee.Type.toLowerCase(),
     assemblyCode: assemblyCommittee.Code,
-    assemblyId: assemblyCommittee.Id,
+    assemblyId: Number(assemblyCommittee.Id),
     name: assemblyCommittee.Name,
     description: assemblyCommittee.Description,
     members: {}

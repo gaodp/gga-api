@@ -134,7 +134,7 @@ module.exports = (jobs, db) -> soap.createClient legislationSvcUri, (err, client
     job.data.session._id = new ObjectId(job.data.session._id)
 
     db.collection("legislation").find(sessionId: job.data.session._id).toArray (err, results) -> ifSuccessful err, callback, ->
-      results.forEach(legislation) ->
+      results.forEach (legislation) ->
         jobs.create('import legislation detail', legislation: legislation)
 
       callback()

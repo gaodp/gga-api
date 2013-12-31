@@ -87,7 +87,12 @@ module.exports = (jobs, db) -> soap.createClient legislationSvcUri, (err, client
   jobs.process 'persist legislation authors', 5, (job, callback) ->
     legislationId = new ObjectId(job.data.legislationId)
 
-    authorAssemblyIds = job.data.legislationDetail.Authors.Sponsorship.map (sponsorship) ->
+    authorsArray = if job.data.legislationDetail.Authors.Sponsorship.map?
+      job.data.legislationDetail.Authors.Sponsorship
+    else
+      [job.data.legislationDetail.Authors.Sponsorship]
+
+    authorAssemblyIds = authorsArray.map (sponsorship) ->
       Number(sponsorship.MemberId)
 
     db.collection("members").find(assemblyId: {"$in": authorAssemblyIds}).toArray (err, results) -> ifSuccessful err, callback, ->

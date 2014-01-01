@@ -85,6 +85,10 @@ module.exports = (jobs, db) -> soap.createClient legislationSvcUri, (err, client
   throw err if err
 
   jobs.process 'persist legislation authors', 5, (job, callback) ->
+    unless job.data.legislationDetail.Authors.Sponsorship?
+      callback()
+      return
+
     legislationId = new ObjectId(job.data.legislationId)
 
     authorsArray = if job.data.legislationDetail.Authors.Sponsorship.map?
@@ -102,6 +106,10 @@ module.exports = (jobs, db) -> soap.createClient legislationSvcUri, (err, client
         callback(err)
 
   jobs.process 'persist legislation committees', 5, (job, callback) ->
+    unless job.data.legislationDetail.Committees.CommitteeListing?
+      callback()
+      return
+
     legislationId = new ObjectId(job.data.legislationId)
 
     committeesArray = if job.data.legislationDetail.Committees.CommitteeListing.map?

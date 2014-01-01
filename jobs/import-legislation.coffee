@@ -25,7 +25,7 @@ eliminateUndefineds = (obj) ->
 
   obj
 
-persistLegislationDetail = (legislationId, legislationDetail, db, jobs, callback) ->
+persistLegislationDetail = (legislation, legislationDetail, db, jobs, callback) ->
   parseStatus = (status) ->
     code: status.Code
     date: new Date(status.Date)
@@ -45,13 +45,13 @@ persistLegislationDetail = (legislationId, legislationDetail, db, jobs, callback
     latestVersion: parseLatestVersion(legislationDetail.LatestVersion)
 
   db.collection("legislation").update
-    _id: legislationId
+    _id: legislation._id
   ,
     "$set": eliminateUndefineds(gaodpLegislationDetail)
   , (err, doc) ->
     ifSuccessful err, callback, ->
-      jobs.create('persist legislation authors', legislationId: legislationId, legislationDetail: legislationDetail).save()
-      jobs.create('persist legislation committees', legislationId: legislationId, legislationDetail: legislationDetail).save()
+      jobs.create('persist legislation authors', legislationId: legislation._id, legislationDetail: legislationDetail).save()
+      jobs.create('persist legislation committees', {legislationId: legislation._id, sessionId: legislation.sessionId, legislationDetail: legislationDetail}).save()
       callback()
 
 persistLegislationIndex = (session, legislationIndex, db, callback) ->
@@ -111,6 +111,7 @@ module.exports = (jobs, db) -> soap.createClient legislationSvcUri, (err, client
       return
 
     legislationId = new ObjectId(job.data.legislationId)
+    sessionId = new ObjectId(job.data.sessionId)
 
     committeesArray = if job.data.legislationDetail.Committees.CommitteeListing.map?
       job.data.legislationDetail.Committees.CommitteeListing
@@ -118,10 +119,16 @@ module.exports = (jobs, db) -> soap.createClient legislationSvcUri, (err, client
       [job.data.legislationDetail.Committees.CommitteeListing]
 
     committeeAssemblyIds = committeesArray.map (committee) ->
-      console.log(committee)
       Number(committee.Id)
 
-    db.collection("committees").find(assemblyId: {"$in": committeeAssemblyIds}).toArray (err, results) -> ifSuccessful err, callback, ->
+    db.collection("committees").find({
+      assemblyId: {"$in": committeeAssemblyIds},
+      sessionId: sessionId
+    }).toArray (err, results) -> ifSuccessful err, callback, ->
+      if results.length == 0
+        callback("No committees found.")
+        return
+
       committeeObjectIds = results.map((_) -> _._id)
 
       db.collection("legislation").update {_id: legislationId}, {"$set": {"committees": committeeObjectIds}}, (err) ->
@@ -130,12 +137,13 @@ module.exports = (jobs, db) -> soap.createClient legislationSvcUri, (err, client
   jobs.process 'import legislation detail', 5, (job, callback) ->
     # Ensure legislation object ID is in the proper format
     job.data.legislation._id = new ObjectId(job.data.legislation._id)
+    job.data.legislation.sessionId = new ObjectId(job.data.legislation.sessionId)
 
     getLegislationDetailArgs =
       LegislationId: job.data.legislation.assemblyId
 
     client.LegislationService.BasicHttpBinding_LegislationSearch.GetLegislationDetail getLegislationDetailArgs, (err, result, raw) -> ifSuccessful err, callback, ->
-      persistLegislationDetail(job.data.legislation._id, result.GetLegislationDetailResult, db, jobs, callback)
+      persistLegislationDetail(job.data.legislation, result.GetLegislationDetailResult, db, jobs, callback)
 
   jobs.process 'import legislation detail for session', 5, (job, callback) ->
     # Ensure object IDs are in the correct format.

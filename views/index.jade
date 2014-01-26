@@ -37,6 +37,11 @@ block content
 
     li
       b
+        a(href="/api/v1/session/"+sessionId) /api/v1/session/:id
+      |  - Retrieve a particular session.
+
+    li
+      b
         a(href="/api/v1/members") /api/v1/members
       |  - Information on members of the General Assembly can be found here. By default, this API call will list information
       | on members for the most recent legislative session. If you would like information on members from a different session,
@@ -44,12 +49,12 @@ block content
 
     li
       b
-        a(href="/api/v1/member/521000b73de13f5bd9be5911") /api/v1/member/:id
+        a(href="/api/v1/member/"+memberId) /api/v1/member/:id
       |  - Information on a single member. Replace the ID in the example that we link to for information on a different member.
 
     li
       b
-        a(href="/api/v1/member/521000b73de13f5bd9be5911/votes") /api/v1/member/:id/votes
+        a(href="/api/v1/member/"+memberId+"/votes") /api/v1/member/:id/votes
       |  - IDs of votes the member has participated in, grouped by what their vote was.
 
     li
@@ -60,7 +65,8 @@ block content
       | on.
 
     li
-      b /api/v1/committee/:id
+      b 
+        a(href="/api/v1/committee/"+committeeId) /api/v1/committee/:id
       |  - List all information on a specific committee.
 
     li
@@ -70,7 +76,8 @@ block content
       | query parameter is provided.)
 
     li
-      b /api/v1/legislation/:id
+      b
+        a(href="/api/v1/legislation/"+legislationId) /api/v1/legislation/:id
       |  - List all information on a specific piece of legislation.
 
     li
@@ -87,5 +94,6 @@ block content
       | provided using a query parameter.)
 
     li
-      b /api/v1/vote/:id
+      b 
+        a(href="/api/v1/vote/"+voteId) /api/v1/vote/:id
       |  - List all information on a specific vote.

@@ -42,6 +42,7 @@ module.exports = (api, db) ->
 
   api.v1.getMemberVotes = (req, res) ->
     memberObjectId = req.member._id
+    normalize = req.query.normalize || false
 
     votesPromise = await('yeas', 'nays', 'notvoteds', 'excuseds')
 
@@ -52,20 +53,24 @@ module.exports = (api, db) ->
         notvoted: got.notvoteds,
         excused: got.excuseds
 
-    db.collection("votes").find({"votes.yea": memberObjectId}).toArray (err, results) ->
-      results = results.map (result) -> result._id
+    db.collection("votes").find({"votes.yea": memberObjectId}, {votes: false}).toArray (err, results) ->
+      if normalize
+        results = results.map (result) -> result._id
       votesPromise.keep('yeas', results)
 
-    db.collection("votes").find({"votes.nay": memberObjectId}).toArray (err, results) ->
-      results = results.map (result) -> result._id
+    db.collection("votes").find({"votes.nay": memberObjectId}, {votes: false}).toArray (err, results) ->
+      if normalize
+        results = results.map (result) -> result._id
       votesPromise.keep('nays', results)
 
-    db.collection("votes").find({"votes.notvoting": memberObjectId}).toArray (err, results) ->
-      results = results.map (result) -> result._id
+    db.collection("votes").find({"votes.notvoting": memberObjectId}, {votes: false}).toArray (err, results) ->
+      if normalize
+        results = results.map (result) -> result._id
       votesPromise.keep('notvoteds', results)
 
-    db.collection("votes").find({"votes.excused": memberObjectId}).toArray (err, results) ->
-      results = results.map (result) -> result._id
+    db.collection("votes").find({"votes.excused": memberObjectId}, {votes: false}).toArray (err, results) ->
+      if normalize
+        results = results.map (result) -> result._id
       votesPromise.keep('excuseds', results)
 
   api

@@ -11,15 +11,15 @@ module.exports = (api, db) ->
         errorId = Math.random().toString(36).substring(7)
         console.error("Error " + errorId + ": " + err)
 
-        res.json
+        res.jsonp
           id: errorId,
           error: err
         , 500
 
         return
 
-      res.json results
+      res.jsonp results
 
-  api.v1.getSessionById = (req, res) -> res.json req.legislativeSession
+  api.v1.getSessionById = (req, res) -> res.jsonp req.legislativeSession
 
   api

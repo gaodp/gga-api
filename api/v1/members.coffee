@@ -14,7 +14,7 @@ module.exports = (api, db) ->
         errorId = Math.random().toString(36).substring(7)
         console.error("Error " + errorId + ": " + err)
 
-        res.json
+        res.jsonp
           id: errorId,
           error: err
         , 500
@@ -29,16 +29,16 @@ module.exports = (api, db) ->
           errorId = Math.random().toString(36).substring(7)
           console.error("Error " + errorId + ": " + err)
 
-          res.json
+          res.jsonp
             id: errorId,
             error: err
           , 500
 
           return
 
-        res.json(results)
+        res.jsonp(results)
 
-  api.v1.getMemberById = (req, res) -> res.json req.member
+  api.v1.getMemberById = (req, res) -> res.jsonp req.member
 
   api.v1.getMemberVotes = (req, res) ->
     memberObjectId = req.member._id
@@ -46,7 +46,7 @@ module.exports = (api, db) ->
     votesPromise = await('yeas', 'nays', 'notvoteds', 'excuseds')
 
     votesPromise.onkeep (got) ->
-      res.json
+      res.jsonp
         yea: got.yeas,
         nay: got.nays,
         notvoted: got.notvoteds,

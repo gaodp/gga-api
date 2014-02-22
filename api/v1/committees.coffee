@@ -6,7 +6,7 @@ module.exports = (api, db) ->
   api = api || {}
   api.v1 = api.v1 || {}
 
-  api.v1.getCommitteeById = (req, res) -> res.json req.committee
+  api.v1.getCommitteeById = (req, res) -> res.jsonp req.committee
 
   api.v1.getCommittees = (req, res) ->
     db.collection("sessions").findOne {current: true}, (err, currentSession) ->
@@ -15,7 +15,7 @@ module.exports = (api, db) ->
         errorId = Math.random().toString(36).substring(7)
         console.error("Error " + errorId + ": " + err)
 
-        res.json
+        res.jsonp
           id: errorId,
           error: err
         , 500
@@ -30,14 +30,14 @@ module.exports = (api, db) ->
           errorId = Math.random().toString(36).substring(7)
           console.error("Error " + errorId + ": " + err)
 
-          res.json
+          res.jsonp
             id: errorId,
             error: err
           , 500
 
           return
 
-        res.json(results)
+        res.jsonp(results)
 
   api
 

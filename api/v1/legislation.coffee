@@ -6,7 +6,7 @@ module.exports = (api, db) ->
   api = api || {}
   api.v1 = api.v1 || {}
 
-  api.v1.getLegislationById = (req, res) -> res.json req.legislation
+  api.v1.getLegislationById = (req, res) -> res.jsonp req.legislation
 
   api.v1.getLegislation = (req, res) ->
     db.collection("sessions").findOne {current: true}, (err, currentSession) ->
@@ -15,7 +15,7 @@ module.exports = (api, db) ->
         errorId = Math.random().toString(36).substring(7)
         console.error("Error " + errorId + ": " + err)
 
-        res.json
+        res.jsonp
           id: errorId,
           error: err
         , 500
@@ -30,20 +30,20 @@ module.exports = (api, db) ->
           errorId = Math.random().toString(36).substring(7)
           console.error("Error " + errorId + ": " + err)
 
-          res.json
+          res.jsonp
             id: errorId,
             error: err
           , 500
 
           return
 
-        res.json(results)
+        res.jsonp(results)
 
   api.v1.getLegislationByTypeAndNumber = (req, res) ->
     type = req.params.type.toUpperCase()
 
     unless type == 'HR' || type == 'HB' || type == "SB" || type == "SR"
-      res.json
+      res.jsonp
         fieldId: "type",
         error: "invalid",
         message: "The legislation type must be one of HR, HB, SB, or SR."
@@ -58,7 +58,7 @@ module.exports = (api, db) ->
         errorId = Math.random().toString(36).substring(7)
         console.error("Error " + errorId + ": " + err)
 
-        res.json
+        res.jsonp
           id: errorId,
           error: err
         , 500
@@ -73,14 +73,14 @@ module.exports = (api, db) ->
           errorId = Math.random().toString(36).substring(7)
           console.error("Error " + errorId + ": " + err)
 
-          res.json
+          res.jsonp
             id: errorId,
             error: err
           , 500
 
           return
 
-        res.json(legislation)
+        res.jsonp(legislation)
 
 
   api

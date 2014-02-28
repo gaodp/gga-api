@@ -11,11 +11,7 @@ module.exports = (api, db) ->
   api.v1.getLegislation = (req, res) ->
     db.collection("legislation").find({sessionId: req.apiRequestSessionId}).sort({number: 1}).toArray (err, results) ->
       if err
-        errorId = Math.random().toString(36).substring(7)
-        console.error("Error " + errorId + ": " + err)
-
         res.jsonp
-          id: errorId,
           error: err
         , 500
 
@@ -38,11 +34,7 @@ module.exports = (api, db) ->
 
     db.collection("legislation").findOne {sessionId: req.apiRequestSessionId, code: fullCode}, (err, legislation) ->
       if err
-        errorId = Math.random().toString(36).substring(7)
-        console.error("Error " + errorId + ": " + err)
-
         res.jsonp
-          id: errorId,
           error: err
         , 500
 

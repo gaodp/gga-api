@@ -10,7 +10,15 @@ requireFu = require('require-fu')
 mongoUrl = "mongodb://127.0.0.1:27017/galegis-api-dev"
 
 jobs = kue.createQueue()
-app = express()
+jobs.on 'job complete', (id) ->
+  kue.Job.get id, (err, job) ->
+    return if err
+
+    job.remove (err) ->
+      if err
+        console.error err
+      else
+        console.log 'removed completed job #%d', job.id
 
 # all environments
 app.set('port', process.env.PORT || 3000)

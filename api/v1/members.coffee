@@ -1,4 +1,4 @@
-# gga-api -- Structured Importing and RESTful providing of GA General Assembly Activity.
+#import legislation detail for session gga-api -- Structured Importing and RESTful providing of GA General Assembly Activity.
 # Copyright (C) 2013 Matthew Farmer - Distributed Under the GNU AGPL 3.0. See LICENSE at project root.
 ObjectId = require('mongodb').ObjectID
 await = require('await')
@@ -22,7 +22,16 @@ module.exports = (api, db) ->
         return
 
       selectedSessionIdStr = req.query.sessionId || currentSession._id.toString()
-      selectedSessionId = new ObjectId(selectedSessionIdStr)
+
+      try
+        selectedSessionId = new ObjectId(selectedSessionIdStr)
+      catch err
+        res.jsonp
+          error: "Invalid session ID."
+        , 500
+
+        res.end
+        return
 
       db.collection("members").find({sessions: selectedSessionId}).toArray (err, results) ->
         if err

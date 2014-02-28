@@ -23,7 +23,16 @@ module.exports = (api, db) ->
         return
 
       selectedSessionIdStr = req.query.sessionId || currentSession._id.toString()
-      selectedSessionId = new ObjectId(selectedSessionIdStr)
+
+      try
+        selectedSessionId = new ObjectId(selectedSessionIdStr)
+      catch err
+        res.jsonp
+          error: "Invalid session ID."
+        , 500
+
+        res.end
+        return
 
       db.collection("committees").find({sessionId: selectedSessionId}).toArray (err, results) ->
         if err

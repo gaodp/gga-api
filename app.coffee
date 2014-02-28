@@ -62,7 +62,7 @@ MongoClient.connect app.get('mongo url'), mongoOptions, (err, db) ->
 
   # Boot HTTP server
   http.createServer(app).listen app.get('port'), () ->
-    console.log('Express server listening on port ' + app.get('port'))
+    console.log('GGA-API is listening on port ' + app.get('port'))
 
   # Boot up job processing system.
   requireFu(__dirname + '/jobs')(jobs, db)

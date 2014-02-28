@@ -40,6 +40,11 @@ module.exports = (api, db) ->
 
         return
 
+      unless legislation?
+        res.send 404
+        res.end()
+        return
+
       res.jsonp(legislation)
 
 

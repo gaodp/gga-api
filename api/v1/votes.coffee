@@ -9,11 +9,7 @@ module.exports = (api, db) ->
   api.v1.getVotes = (req, res) ->
     db.collection("votes").find({sessionId: req.apiRequestSessionId}).toArray (err, results) ->
       if err
-        errorId = Math.random().toString(36).substring(7)
-        console.error("Error " + errorId + ": " + err)
-
         res.jsonp
-          id: errorId,
           error: err
         , 500
 

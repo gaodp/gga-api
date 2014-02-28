@@ -5,12 +5,8 @@ module.exports = (app, jobs, db) ->
   ObjectId = require('mongodb').ObjectID;
 
   retrievalError = (error, res) ->
-    errorId = Math.random().toString(36).substring(7)
-    console.error("Error " + errorId + ": " + err)
-
     res.json
-      id: errorId,
-      error: err
+      error: error
     , 500
 
   validObjectId = (possibleObjectId) ->

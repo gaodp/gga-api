@@ -10,11 +10,7 @@ module.exports = (api, db) ->
   api.v1.getMembers = (req, res) ->
     db.collection("members").find({sessions: req.apiRequestSessionId}).toArray (err, results) ->
       if err
-        errorId = Math.random().toString(36).substring(7)
-        console.error("Error " + errorId + ": " + err)
-
         res.jsonp
-          id: errorId,
           error: err
         , 500
 

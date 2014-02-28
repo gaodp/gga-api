@@ -40,6 +40,7 @@ if 'development' == app.get('env')
 # Production environment settings.
 if 'production' == app.get('env')
   app.set('mongo url', "mongodb://127.0.0.1:27017/galegis-api")
+  app.set('json spaces', 2)
   app.use(express.logger('default'))
 
   kueUser = process.env.KUEUSER || "kue"

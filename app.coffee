@@ -7,8 +7,7 @@ kue = require('kue')
 MongoClient = require('mongodb').MongoClient
 requireFu = require('require-fu')
 
-mongoUrl = "mongodb://127.0.0.1:27017/galegis-api-dev"
-
+# Set up the Job queue.
 jobs = kue.createQueue()
 jobs.on 'job complete', (id) ->
   kue.Job.get id, (err, job) ->
@@ -20,10 +19,12 @@ jobs.on 'job complete', (id) ->
       else
         console.log 'removed completed job #%d', job.id
 
-# all environments
+# Set up Express.
+app = express()
 app.set('port', process.env.PORT || 3000)
 app.set('views', __dirname + '/views')
 app.set('view engine', 'jade')
+app.set('mongo url', "mongodb://127.0.0.1:27017/galegis-api-dev")
 app.use(express.favicon())
 app.use(express.bodyParser())
 app.use(express.methodOverride())
@@ -31,16 +32,15 @@ app.use(app.router)
 app.use(require('stylus').middleware(__dirname + '/public'))
 app.use(express.static(path.join(__dirname, 'public')))
 
-# development only
+# Development environment settings.
 if 'development' == app.get('env')
   app.use(express.logger('dev'))
   app.use(express.errorHandler())
   app.use('/kue', kue.app)
 
-# production only
+# Production environment settings.
 if 'production' == app.get('env')
-  mongoUrl = "mongodb://127.0.0.1:27017/galegis-api"
-
+  app.set('mongo url', "mongodb://127.0.0.1:27017/galegis-api")
   app.use(express.logger('default'))
 
   kueUser = process.env.KUEUSER || "kue"
@@ -56,7 +56,7 @@ mongoOptions =
     poolSize: 10
     auto_reconnect: true
 
-MongoClient.connect mongoUrl, mongoOptions, (err, db) ->
+MongoClient.connect app.get('mongo url'), mongoOptions, (err, db) ->
   # Load up routes
   requireFu(__dirname + '/routes')(app, jobs, db)
 

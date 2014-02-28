@@ -9,9 +9,8 @@ module.exports = (api, db) ->
   api.v1.getLegislationById = (req, res) -> res.jsonp req.legislation
 
   api.v1.getLegislation = (req, res) ->
-    db.collection("sessions").findOne {current: true}, (err, currentSession) ->
-      unless currentSession?
-        err = "Could not find current session."
+    db.collection("legislation").find({sessionId: req.apiRequestSessionId}).sort({number: 1}).toArray (err, results) ->
+      if err
         errorId = Math.random().toString(36).substring(7)
         console.error("Error " + errorId + ": " + err)
 
@@ -22,31 +21,7 @@ module.exports = (api, db) ->
 
         return
 
-      selectedSessionIdStr = req.query.sessionId || currentSession._id.toString()
-
-      try
-        selectedSessionId = new ObjectId(selectedSessionIdStr)
-      catch err
-        res.jsonp
-          error: "Invalid session ID."
-        , 500
-
-        res.end
-        return
-
-      db.collection("legislation").find({sessionId: selectedSessionId}).sort({number: 1}).toArray (err, results) ->
-        if err
-          errorId = Math.random().toString(36).substring(7)
-          console.error("Error " + errorId + ": " + err)
-
-          res.jsonp
-            id: errorId,
-            error: err
-          , 500
-
-          return
-
-        res.jsonp(results)
+      res.jsonp(results)
 
   api.v1.getLegislationByTypeAndNumber = (req, res) ->
     type = req.params.type.toUpperCase()
@@ -61,9 +36,8 @@ module.exports = (api, db) ->
 
     fullCode = type + " " + req.params.number
 
-    db.collection("sessions").findOne {current: true}, (err, currentSession) ->
-      unless currentSession?
-        err = "Could not find current session."
+    db.collection("legislation").findOne {sessionId: req.apiRequestSessionId, code: fullCode}, (err, legislation) ->
+      if err
         errorId = Math.random().toString(36).substring(7)
         console.error("Error " + errorId + ": " + err)
 
@@ -74,22 +48,7 @@ module.exports = (api, db) ->
 
         return
 
-      selectedSessionIdStr = req.query.sessionId || currentSession._id.toString()
-      selectedSessionId = new ObjectId(selectedSessionIdStr)
-
-      db.collection("legislation").findOne {sessionId: selectedSessionId, code: fullCode}, (err, legislation) ->
-        if err
-          errorId = Math.random().toString(36).substring(7)
-          console.error("Error " + errorId + ": " + err)
-
-          res.jsonp
-            id: errorId,
-            error: err
-          , 500
-
-          return
-
-        res.jsonp(legislation)
+      res.jsonp(legislation)
 
 
   api

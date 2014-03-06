@@ -9,12 +9,12 @@
   "dependencies": {
     "express": "3.3.4",
     "require-fu": "1.0.0",
-    "jade": "*",
-    "stylus": "*",
-    "kue": "0.6.2",
+    "jade": "1.3.0",
+    "stylus": "0.42.3",
+    "kue": "0.7.5",
     "mongodb": "1.3.10",
-    "soap": "*",
-    "moment": "*"
+    "soap": "0.4.0",
+    "moment": "2.5.1"
   },
   "devDependencies": {
     "chai": "*",

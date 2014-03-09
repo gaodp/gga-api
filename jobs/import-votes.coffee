@@ -76,23 +76,31 @@ module.exports = (jobs, db) -> soap.createClient votesSvcUri, (err, client) ->
         persistVote(job.data.session, result.GetVoteResult, db, callback)
 
   jobs.process 'import all votes for session', 5, (job, callback) ->
-    getVotesArgs = SessionId: job.data.session.assemblyId
+    for branch in ["Senate"]
+      getVotesArgs =
+        SessionId: job.data.session.assemblyId
+        Branch: branch
 
-    client.VoteService.BasicHttpBinding_VoteFinder.GetVotes getVotesArgs, (err, result, raw) ->
-      if err
-        callback(err)
-      else
-        result.GetVotesResult.VoteListing?.forEach? (assemblyVoteSummary) ->
-          job.log 'Kueing up import vote job for ' + assemblyVoteSummary.VoteId
+      console.log(getVotesArgs)
 
-          voteJob = jobs.create 'import vote',
-            assemblyVoteSummary: assemblyVoteSummary,
-            voteId: assemblyVoteSummary.VoteId,
-            session: job.data.session
+      client.VoteService.BasicHttpBinding_VoteFinder.GetVotes getVotesArgs, (err, result, raw) ->
+        if err
+          callback(err)
+        else
+          result.GetVotesResult.VoteListing?.forEach? (assemblyVoteSummary) ->
+            if assemblyVoteSummary.Branch != branch
+              return
 
-          voteJob.save()
+            job.log 'Kueing up import vote job for ' + assemblyVoteSummary.VoteId
 
-        callback()
+            voteJob = jobs.create 'import vote',
+              assemblyVoteSummary: assemblyVoteSummary,
+              voteId: assemblyVoteSummary.VoteId,
+              session: job.data.session
+
+            voteJob.save()
+
+          callback()
 
   jobs.process 'import all votes', (job, callback) ->
     db.collection("sessions").find().toArray (err, results) -> ifSuccessful err, callback, ->

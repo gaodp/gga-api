@@ -134,7 +134,7 @@ module.exports = (jobs, db) -> soap.createClient legislationSvcUri, (err, client
       db.collection("legislation").update {_id: legislationId}, {"$set": {"committees": committeeObjectIds}}, (err) ->
         callback(err)
 
-  jobs.process 'import legislation detail', 5, (job, callback) ->
+  jobs.process 'import legislation detail', 20, (job, callback) ->
     # Ensure legislation object ID is in the proper format
     job.data.legislation._id = new ObjectId(job.data.legislation._id)
     job.data.legislation.sessionId = new ObjectId(job.data.legislation.sessionId)

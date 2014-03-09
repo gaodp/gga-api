@@ -78,8 +78,8 @@ module.exports = (jobs, db) -> soap.createClient votesSvcUri, (err, client) ->
   jobs.process 'import all votes for session', 5, (job, callback) ->
     for branch in ["Senate"]
       getVotesArgs =
-        SessionId: job.data.session.assemblyId
         Branch: branch
+        SessionId: job.data.session.assemblyId
 
       console.log(getVotesArgs)
 

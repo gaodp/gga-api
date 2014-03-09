@@ -76,7 +76,7 @@ module.exports = (jobs, db) -> soap.createClient votesSvcUri, (err, client) ->
         persistVote(job.data.session, result.GetVoteResult, db, callback)
 
   jobs.process 'import all votes for session', 5, (job, callback) ->
-    for branch in ["Senate"]
+    for branch in ["House", "Senate"]
       getVotesArgs =
         Branch: branch
         SessionId: job.data.session.assemblyId

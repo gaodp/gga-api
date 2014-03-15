@@ -89,6 +89,7 @@ module.exports = (jobs, db) -> soap.createClient votesSvcUri, (err, client) ->
         else
           result.GetVotesResult.VoteListing?.forEach? (assemblyVoteSummary) ->
             if assemblyVoteSummary.Branch != branch
+              console.log("Wanted #{assemblyVoteSummary.Branch} got #{branch}")
               return
 
             job.log 'Kueing up import vote job for ' + assemblyVoteSummary.VoteId

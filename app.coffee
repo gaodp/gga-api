@@ -16,8 +16,6 @@ jobs.on 'job complete', (id) ->
     job.remove (err) ->
       if err
         console.error err
-      else
-        console.log 'removed completed job #%d', job.id
 
 # Set up Express.
 app = express()

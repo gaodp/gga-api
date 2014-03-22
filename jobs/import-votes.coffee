@@ -75,33 +75,32 @@ module.exports = (jobs, db) -> soap.createClient votesSvcUri, (err, client) ->
         job.log 'Persisting full vote information.'
         persistVote(job.data.session, result.GetVoteResult, db, callback)
 
-  jobs.process 'import all votes for session', 5, (job, callback) ->
-    for branch in ["House", "Senate"]
-      getVotesArgs =
-        Branch: branch
-        SessionId: job.data.session.assemblyId
+  jobs.process 'import all votes for session and branch', 5, (job, callback) ->
+    client.VoteService.BasicHttpBinding_VoteFinder.GetVotes {Branch: job.data.branch, SessionId: job.data.session.assemblyId}, (err, result, raw) ->
+      if err
+        callback(err)
+      else
+        result.GetVotesResult.VoteListing?.forEach? (assemblyVoteSummary) ->
+          if assemblyVoteSummary.Branch != job.data.branch
+            console.log("Wanted #{job.data.branch} got #{assemblyVoteSummary.Branch}")
+            return
 
-      console.log(getVotesArgs)
+          job.log 'Kueing up import vote job for ' + assemblyVoteSummary.VoteId
 
-      client.VoteService.BasicHttpBinding_VoteFinder.GetVotes getVotesArgs, (err, result, raw) ->
-        if err
-          callback(err)
-        else
-          result.GetVotesResult.VoteListing?.forEach? (assemblyVoteSummary) ->
-            if assemblyVoteSummary.Branch != branch
-              console.log("Wanted #{assemblyVoteSummary.Branch} got #{branch}")
-              return
+          voteJob = jobs.create 'import vote',
+            assemblyVoteSummary: assemblyVoteSummary,
+            voteId: assemblyVoteSummary.VoteId,
+            session: job.data.session
 
-            job.log 'Kueing up import vote job for ' + assemblyVoteSummary.VoteId
-
-            voteJob = jobs.create 'import vote',
-              assemblyVoteSummary: assemblyVoteSummary,
-              voteId: assemblyVoteSummary.VoteId,
-              session: job.data.session
-
-            voteJob.save()
-
+          voteJob.save()
           callback()
+
+  jobs.process 'import all votes for session', 5, (job, callback) ->
+    for branch in ["Senate", "House"]
+      jobs.create('import all votes for session and branch', session: job.data.session, branch: branch).save()
+
+    callback()
+
 
   jobs.process 'import all votes', (job, callback) ->
     db.collection("sessions").find().toArray (err, results) -> ifSuccessful err, callback, ->

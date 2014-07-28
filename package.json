@@ -8,13 +8,15 @@
   },
   "dependencies": {
     "express": "4.7.x",
+    "morgan": "1.2.x",
     "require-fu": "1.0.0",
     "jade": "1.5.x",
     "stylus": "0.47.x",
     "kue": "0.8.x",
     "mongodb": "1.4.x",
     "soap": "vpulim/node-soap",
-    "moment": "2.7.x"
+    "moment": "2.7.x",
+    "errorhandler": "1.1.x"
   },
   "devDependencies": {
     "chai": "*",

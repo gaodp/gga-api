@@ -6,6 +6,8 @@ path = require('path')
 kue = require('kue')
 MongoClient = require('mongodb').MongoClient
 requireFu = require('require-fu')
+morgan = require('morgan')
+errorhandler = require('errorhandler')
 
 # Set up the Job queue.
 jobs = kue.createQueue()
@@ -23,23 +25,20 @@ app.set('port', process.env.PORT || 3000)
 app.set('views', __dirname + '/views')
 app.set('view engine', 'jade')
 app.set('mongo url', "mongodb://127.0.0.1:27017/galegis-api-dev")
-app.use(express.favicon())
-app.use(express.methodOverride())
-app.use(app.router)
 app.use(require('stylus').middleware(__dirname + '/public'))
 app.use(express.static(path.join(__dirname, 'public')))
+app.set('json spaces', 2)
 
 # Development environment settings.
 if 'development' == app.get('env')
-  app.use(express.logger('dev'))
-  app.use(express.errorHandler())
+  app.use(morgan('dev'))
+  app.use(errorhandler())
   app.use('/kue', kue.app)
 
 # Production environment settings.
 if 'production' == app.get('env')
   app.set('mongo url', "mongodb://127.0.0.1:27017/galegis-api")
-  app.set('json spaces', 2)
-  app.use(express.logger('default'))
+  app.use(morgan('default'))
 
   kueUser = process.env.KUEUSER || "kue"
   kuePass = process.env.KUEPASS || "kue"

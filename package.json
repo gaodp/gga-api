@@ -16,7 +16,8 @@
     "mongodb": "1.4.x",
     "soap": "vpulim/node-soap",
     "moment": "2.7.x",
-    "errorhandler": "1.1.x"
+    "errorhandler": "1.1.x",
+    "basic-auth-connect": "1.0.x"
   },
   "devDependencies": {
     "chai": "*",

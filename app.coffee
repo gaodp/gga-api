@@ -8,6 +8,7 @@ MongoClient = require('mongodb').MongoClient
 requireFu = require('require-fu')
 morgan = require('morgan')
 errorhandler = require('errorhandler')
+basicAuth = require('basic-auth-connect')
 
 # Set up the Job queue.
 jobs = kue.createQueue()
@@ -43,7 +44,7 @@ if 'production' == app.get('env')
   kueUser = process.env.KUEUSER || "kue"
   kuePass = process.env.KUEPASS || "kue"
 
-  app.use('/kue', express.basicAuth(kueUser, kuePass))
+  app.use('/kue', basicAuth(kueUser, kuePass))
   app.use('/kue', kue.app)
 
 mongoOptions =

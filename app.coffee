@@ -25,7 +25,7 @@ app = express()
 app.set('port', process.env.PORT || 3000)
 app.set('views', __dirname + '/views')
 app.set('view engine', 'jade')
-app.set('mongo url', "mongodb://127.0.0.1:27017/galegis-api-dev")
+app.set('mongo url', "mongodb://127.0.0.1:27017/galegis-api-dev?slaveOk=true")
 app.use(require('stylus').middleware(__dirname + '/public'))
 app.use(express.static(path.join(__dirname, 'public')))
 app.set('json spaces', 2)
@@ -38,7 +38,7 @@ if 'development' == app.get('env')
 
 # Production environment settings.
 if 'production' == app.get('env')
-  app.set('mongo url', "mongodb://127.0.0.1:27017/galegis-api")
+  app.set('mongo url', "mongodb://127.0.0.1:27017/galegis-api?slaveOk=true")
   app.use(morgan('default'))
 
   kueUser = process.env.KUEUSER || "kue"

@@ -82,7 +82,7 @@ module.exports = (jobs, db) -> soap.createClient committeesSvcUri, (err, client)
         callback(err)
         return
 
-      result.GetCommitteesBySessionResult.CommitteeListing.forEach (committeeBrief) ->
+      result.GetCommitteesBySessionResult.CommitteeListing?.forEach (committeeBrief) ->
         jobs.create("import committee for session", committeeBrief: committeeBrief, session: job.data.session).save()
 
       callback()

@@ -10,7 +10,7 @@ sessionSvcUri = "./wsdl/Sessions.svc.xml"
 persistSession = (session, db, promise) ->
   sessionInstance =
     name: session.Description,
-    current: (session.IsDefault.toLowerCase() == "true"),
+    current: session.IsDefault,
     library: session.Library
 
   db.collection("sessions").update

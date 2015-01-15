@@ -3,6 +3,52 @@
 ObjectId = require('mongodb').ObjectID
 await = require('await')
 
+memberVoteImplementation = (req, res, queryTransformer) ->
+  memberObjectId = req.member._id
+  normalize = req.query.normalize || false
+  queryTransformer = queryTransformer || (thing)->thing
+
+  votesPromise = await('yeas', 'nays', 'notvoteds', 'excuseds')
+
+  votesPromise.onkeep (got) ->
+    res.jsonp
+      yea: got.yeas,
+      nay: got.nays,
+      notvoted: got.notvoteds,
+      excused: got.excuseds
+
+  db.collection("votes").find(
+    queryTransformer({"votes.yea": memberObjectId}),
+    {votes: false}
+  ).toArray (err, results) ->
+    if normalize
+      results = results.map (result) -> result._id
+    votesPromise.keep('yeas', results)
+
+  db.collection("votes").find(
+    queryTransformer({"votes.nay": memberObjectId}),
+    {votes: false}
+  ).toArray (err, results) ->
+    if normalize
+      results = results.map (result) -> result._id
+    votesPromise.keep('nays', results)
+
+  db.collection("votes").find(
+    queryTransformer({"votes.notvoting": memberObjectId}),
+    {votes: false}
+  ).toArray (err, results) ->
+    if normalize
+      results = results.map (result) -> result._id
+    votesPromise.keep('notvoteds', results)
+
+  db.collection("votes").find(
+    queryTransformer({"votes.excused": memberObjectId}),
+    {votes: false}
+  ).toArray (err, results) ->
+    if normalize
+      results = results.map (result) -> result._id
+    votesPromise.keep('excuseds', results)
+
 module.exports = (api, db) ->
   api = api || {}
   api.v1 = api.v1 || {}
@@ -21,36 +67,10 @@ module.exports = (api, db) ->
   api.v1.getMemberById = (req, res) -> res.jsonp req.member
 
   api.v1.getMemberVotes = (req, res) ->
-    memberObjectId = req.member._id
-    normalize = req.query.normalize || false
+    memberVoteImplementation(req, res)
 
-    votesPromise = await('yeas', 'nays', 'notvoteds', 'excuseds')
-
-    votesPromise.onkeep (got) ->
-      res.jsonp
-        yea: got.yeas,
-        nay: got.nays,
-        notvoted: got.notvoteds,
-        excused: got.excuseds
-
-    db.collection("votes").find({"votes.yea": memberObjectId}, {votes: false}).toArray (err, results) ->
-      if normalize
-        results = results.map (result) -> result._id
-      votesPromise.keep('yeas', results)
-
-    db.collection("votes").find({"votes.nay": memberObjectId}, {votes: false}).toArray (err, results) ->
-      if normalize
-        results = results.map (result) -> result._id
-      votesPromise.keep('nays', results)
-
-    db.collection("votes").find({"votes.notvoting": memberObjectId}, {votes: false}).toArray (err, results) ->
-      if normalize
-        results = results.map (result) -> result._id
-      votesPromise.keep('notvoteds', results)
-
-    db.collection("votes").find({"votes.excused": memberObjectId}, {votes: false}).toArray (err, results) ->
-      if normalize
-        results = results.map (result) -> result._id
-      votesPromise.keep('excuseds', results)
+  api.v1.getMemberVotesBySession = (req, res) ->
+    memberVoteImplementation req, res, (baseQuery) ->
+      baseQuery.sessionId = req.legislativeSession
 
   api

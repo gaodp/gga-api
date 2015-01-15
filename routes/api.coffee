@@ -42,6 +42,7 @@ module.exports = (app, jobs, db) ->
   app.get '/api/v1/members', api.v1.getMembers
   app.get '/api/v1/member/:member', api.v1.getMemberById
   app.get '/api/v1/member/:member/votes', api.v1.getMemberVotes
+  app.get '/api/v1/member/:member/sessions/:legislativeSession/votes', api.v1.getMemberVotesBySession
 
   app.get '/api/v1/committees', api.v1.getCommittees
   app.get '/api/v1/committee/:committee', api.v1.getCommitteeById

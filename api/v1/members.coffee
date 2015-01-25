@@ -72,5 +72,6 @@ module.exports = (api, db) ->
   api.v1.getMemberVotesBySession = (req, res) ->
     memberVoteImplementation db, req, res, (baseQuery) ->
       baseQuery.sessionId = req.legislativeSession._id
+      baseQuery
 
   api

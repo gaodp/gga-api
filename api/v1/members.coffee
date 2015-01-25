@@ -3,7 +3,7 @@
 ObjectId = require('mongodb').ObjectID
 await = require('await')
 
-memberVoteImplementation = (req, res, queryTransformer) ->
+memberVoteImplementation = (db, req, res, queryTransformer) ->
   memberObjectId = req.member._id
   normalize = req.query.normalize || false
   queryTransformer = queryTransformer || (thing)->thing
@@ -67,10 +67,10 @@ module.exports = (api, db) ->
   api.v1.getMemberById = (req, res) -> res.jsonp req.member
 
   api.v1.getMemberVotes = (req, res) ->
-    memberVoteImplementation(req, res)
+    memberVoteImplementation(db, req, res)
 
   api.v1.getMemberVotesBySession = (req, res) ->
-    memberVoteImplementation req, res, (baseQuery) ->
+    memberVoteImplementation db, req, res, (baseQuery) ->
       baseQuery.sessionId = req.legislativeSession
 
   api

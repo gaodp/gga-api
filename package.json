@@ -18,12 +18,12 @@
     "soap": "vpulim/node-soap",
     "moment": "2.7.x",
     "errorhandler": "1.1.x",
-    "basic-auth-connect": "1.0.x"
+    "basic-auth-connect": "1.0.x",
+    "await": "0.2.4"
   },
   "devDependencies": {
     "chai": "*",
     "mocha": "*",
-    "await": "0.2.4",
     "request": "*"
   },
   "engines": {

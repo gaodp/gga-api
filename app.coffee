@@ -11,9 +11,12 @@ errorhandler = require('errorhandler')
 basicAuth = require('basic-auth-connect')
 
 # Set up the Job queue.
-jobs = if process.env.REDISTOGO_URL
-  console.log "Attempting to connect to " + process.env.REDISTOGO_URL
-  kue.createQueue redis: process.env.REDISTOGO_URL
+jobs = if process.env.REDISTOGO_PASSWORD && process.env.REDISTOGO_HOST
+  console.log "Attempting to connect to RedisToGo"
+  kue.createQueue redis:
+    host: process.env.REDISTOGO_HOST
+    auth: process.env.REDISTOGO_PASSWORD
+    port: process.env.REDISTOGO_PORT
 else
   kue.createQueue()
 

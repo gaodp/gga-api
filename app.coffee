@@ -3,30 +3,33 @@
 express = require('express')
 http = require('http')
 path = require('path')
-kue = require('kue')
+kue = null
 MongoClient = require('mongodb').MongoClient
 requireFu = require('require-fu')
 morgan = require('morgan')
 errorhandler = require('errorhandler')
 basicAuth = require('basic-auth-connect')
 
-# Set up the Job queue.
-jobs = if process.env.REDISTOGO_PASSWORD && process.env.REDISTOGO_HOST
-  console.log "Attempting to connect to RedisToGo"
-  kue.createQueue redis:
-    host: process.env.REDISTOGO_HOST
-    auth: process.env.REDISTOGO_PASSWORD
-    port: process.env.REDISTOGO_PORT
-else
-  kue.createQueue()
+jobs = null
+if process.env.JOBS_ENABLED
+  kue = require('kue')
+  # Set up the Job queue.
+  jobs = if process.env.REDISTOGO_PASSWORD && process.env.REDISTOGO_HOST
+    console.log "Attempting to connect to RedisToGo"
+    kue.createQueue redis:
+      host: process.env.REDISTOGO_HOST
+      auth: process.env.REDISTOGO_PASSWORD
+      port: process.env.REDISTOGO_PORT
+  else
+    kue.createQueue()
 
-jobs.on 'job complete', (id) ->
-  kue.Job.get id, (err, job) ->
-    return if err
+  jobs.on 'job complete', (id) ->
+    kue.Job.get id, (err, job) ->
+      return if err
 
-    job.remove (err) ->
-      if err
-        console.error err
+      job.remove (err) ->
+        if err
+          console.error err
 
 # Set up Express.
 app = express()
@@ -42,7 +45,9 @@ app.set('json spaces', 2)
 if 'development' == app.get('env')
   app.use(morgan('dev'))
   app.use(errorhandler())
-  app.use('/kue', kue.app)
+
+  if process.env.JOBS_ENABLED
+    app.use('/kue', kue.app)
 
 # Production environment settings.
 if 'production' == app.get('env')
@@ -52,8 +57,9 @@ if 'production' == app.get('env')
   kueUser = process.env.KUEUSER || "kue"
   kuePass = process.env.KUEPASS || "kue"
 
-  app.use('/kue', basicAuth(kueUser, kuePass))
-  app.use('/kue', kue.app)
+  if process.env.JOBS_ENABLED
+    app.use('/kue', basicAuth(kueUser, kuePass))
+    app.use('/kue', kue.app)
 
 mongoOptions =
   db:
@@ -70,5 +76,6 @@ MongoClient.connect app.get('mongo url'), mongoOptions, (err, db) ->
   http.createServer(app).listen app.get('port'), () ->
     console.log('GGA-API is listening on port ' + app.get('port'))
 
-  # Boot up job processing system.
-  requireFu(__dirname + '/jobs')(jobs, db)
+  if process.env.JOBS_ENABLED
+    # Boot up job processing system.
+    requireFu(__dirname + '/jobs')(jobs, db)

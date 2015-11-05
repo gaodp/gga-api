@@ -12,6 +12,7 @@ basicAuth = require('basic-auth-connect')
 
 # Set up the Job queue.
 jobs = if process.env.REDISTOGO_URL
+  console.log "Attempting to connect to " + process.env.REDISTOGO_URL
   kue.createQueue redis: process.env.REDISTOGO_URL
 else
   kue.createQueue()

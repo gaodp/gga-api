@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "start": "coffee app.coffee",
+    "start": "./node_modules/.bin/coffee app.coffee",
     "test": "./node_modules/.bin/mocha -C --compilers coffee:coffee-script -u tdd -R spec --timeout 2000"
   },
   "dependencies": {

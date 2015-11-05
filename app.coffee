@@ -11,7 +11,11 @@ errorhandler = require('errorhandler')
 basicAuth = require('basic-auth-connect')
 
 # Set up the Job queue.
-jobs = kue.createQueue()
+jobs = if process.env.REDISTOGO_URL
+  kue.createQueue redis: process.env.REDISTOGO_URL
+else
+  kue.createQueue()
+
 jobs.on 'job complete', (id) ->
   kue.Job.get id, (err, job) ->
     return if err
@@ -38,7 +42,7 @@ if 'development' == app.get('env')
 
 # Production environment settings.
 if 'production' == app.get('env')
-  app.set('mongo url', "mongodb://127.0.0.1:27017/galegis-api?slaveOk=true")
+  app.set('mongo url', process.env.MONGOLAB_URI || "mongodb://127.0.0.1:27017/galegis-api?slaveOk=true")
   app.use(morgan('default'))
 
   kueUser = process.env.KUEUSER || "kue"
